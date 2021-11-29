@@ -18,6 +18,13 @@ package org.apache.dubbo.common.extension;
 
 import org.apache.dubbo.common.lang.Prioritized;
 
+/**
+ * Dubbo扩展的加载策略，有以下几种：
+ * - DubboExternalLoadingStrategy，从META-INF/dubbo/external/位置加载扩展类，优先级：MAX_PRIORITY + 1
+ * - DubboInternalLoadingStrategy，从META-INF/dubbo/internal/位置加载扩展类，优先级：MAX_PRIORITY
+ * - DubboLoadingStrategy，从META-INF/dubbo/位置加载扩展类，优先级：NORMAL_PRIORITY
+ * - ServicesLoadingStrategy，从META-INF/services/位置加载扩展类，优先级：MIN_PRIORITY
+ */
 public interface LoadingStrategy extends Prioritized {
 
     String directory();

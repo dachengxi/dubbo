@@ -38,6 +38,8 @@ import java.lang.annotation.Target;
  * @see SPI
  * @see URL
  * @see ExtensionLoader
+ *
+ * 可以自动激活符合条件的一系列的扩展点的实现
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

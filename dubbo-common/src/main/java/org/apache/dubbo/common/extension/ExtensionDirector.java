@@ -30,11 +30,22 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <p></p>
  * <p>ExtensionDirector supports multiple levels, and the child can inherit the parent's extension instances. </p>
  * <p>The way to find and create an extension instance is similar to Java classloader.</p>
+ *
+ * 扩展加载器的管理器，用来管理扩展加载器
  */
 public class ExtensionDirector implements ExtensionAccessor {
 
+    /**
+     * 存放扩展加载器
+     * key：扩展加载器的Class
+     * value：扩展加载器实例
+     */
     private final ConcurrentMap<Class<?>, ExtensionLoader<?>> extensionLoadersMap = new ConcurrentHashMap<>(64);
     private final ConcurrentMap<Class<?>, ExtensionScope> extensionScopeMap = new ConcurrentHashMap<>(64);
+
+    /**
+     * 父扩展加载器管理器
+     */
     private ExtensionDirector parent;
     private final ExtensionScope scope;
     private List<ExtensionPostProcessor> extensionPostProcessors = new ArrayList<>();
@@ -62,6 +73,12 @@ public class ExtensionDirector implements ExtensionAccessor {
         return this;
     }
 
+    /**
+     * 获取扩展加载器
+     * @param type
+     * @param <T>
+     * @return
+     */
     @Override
     public <T> ExtensionLoader<T> getExtensionLoader(Class<T> type) {
         checkDestroyed();
@@ -77,6 +94,7 @@ public class ExtensionDirector implements ExtensionAccessor {
         }
 
         // 1. find in local cache
+        // 从缓存中直接查找有没有对应的扩展加载器
         ExtensionLoader<T> loader = (ExtensionLoader<T>) extensionLoadersMap.get(type);
 
         ExtensionScope scope = extensionScopeMap.get(type);
@@ -99,6 +117,7 @@ public class ExtensionDirector implements ExtensionAccessor {
         }
 
         // 3. create it
+        // 创建扩展加载器
         if (loader == null) {
             loader = createExtensionLoader(type);
         }
@@ -106,10 +125,17 @@ public class ExtensionDirector implements ExtensionAccessor {
         return loader;
     }
 
+    /**
+     * 创建扩展加载器
+     * @param type
+     * @param <T>
+     * @return
+     */
     private <T> ExtensionLoader<T> createExtensionLoader(Class<T> type) {
         ExtensionLoader<T> loader = null;
         if (isScopeMatched(type)) {
             // if scope is matched, just create it
+            // 创建扩展加载器
             loader = createExtensionLoader0(type);
         } else {
             // if scope is not matched, ignore it
@@ -117,6 +143,12 @@ public class ExtensionDirector implements ExtensionAccessor {
         return loader;
     }
 
+    /**
+     * 创建扩展加载器
+     * @param type
+     * @param <T>
+     * @return
+     */
     private <T> ExtensionLoader<T> createExtensionLoader0(Class<T> type) {
         checkDestroyed();
         ExtensionLoader<T> loader;

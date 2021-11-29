@@ -29,6 +29,8 @@ import java.lang.annotation.Target;
  *
  * @see ExtensionLoader
  * @see URL
+ *
+ * 可根据指定的参数来在运行的时候决定使用哪一个扩展点实现
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
