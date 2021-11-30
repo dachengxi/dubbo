@@ -89,6 +89,7 @@ public class AdaptiveClassCodeGenerator {
 
     /**
      * generate and return class code
+     * 生成类代码
      */
     public String generate() {
         return this.generate(false);
@@ -96,6 +97,9 @@ public class AdaptiveClassCodeGenerator {
 
     /**
      * generate and return class code
+     *
+     * 生成类代码
+     *
      * @param sort - whether sort methods
      */
     public String generate(boolean sort) {
@@ -105,14 +109,22 @@ public class AdaptiveClassCodeGenerator {
         }
 
         StringBuilder code = new StringBuilder();
+
+        // 生成package
         code.append(generatePackageInfo());
+
+        // 生成import
         code.append(generateImports());
+
+        // 生成类的签名：public class Xxxx$Adaptive implements Xxxx {
         code.append(generateClassDeclaration());
 
         Method[] methods = type.getMethods();
         if (sort) {
             Arrays.sort(methods, Comparator.comparing(Method::toString));
         }
+
+        // 生成所有的方法
         for (Method method : methods) {
             code.append(generateMethod(method));
         }
@@ -172,13 +184,25 @@ public class AdaptiveClassCodeGenerator {
 
     /**
      * generate method declaration
+     * 生成方法
      */
     private String generateMethod(Method method) {
+        // 方法的返回类型
         String methodReturnType = method.getReturnType().getCanonicalName();
+
+        // 方法名字
         String methodName = method.getName();
+
+        // 生成方法的内容
         String methodContent = generateMethodContent(method);
+
+        // 生成方法的参数
         String methodArgs = generateMethodArguments(method);
+
+        // 生成方法抛出的异常信息
         String methodThrows = generateMethodThrows(method);
+
+        // 将上面的信息组成一个方法的代码
         return String.format(CODE_METHOD_DECLARATION, methodReturnType, methodName, methodArgs, methodThrows, methodContent);
     }
 
@@ -214,10 +238,14 @@ public class AdaptiveClassCodeGenerator {
 
     /**
      * generate method content
+     * 生成方法的内容
      */
     private String generateMethodContent(Method method) {
+        // Adaptive注解
         Adaptive adaptiveAnnotation = method.getAnnotation(Adaptive.class);
         StringBuilder code = new StringBuilder(512);
+
+        // 如果方法没有Adaptive注解，则直接生成一个抛异常的代码
         if (adaptiveAnnotation == null) {
             return generateUnsupported(method);
         } else {

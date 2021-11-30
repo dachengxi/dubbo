@@ -191,6 +191,10 @@ public class ExtensionLoader<T> {
     private ScopeModel scopeModel;
     private AtomicBoolean destroyed = new AtomicBoolean();
 
+    /**
+     * 设置加载扩展类的Class的策略
+     * @param strategies
+     */
     public static void setLoadingStrategies(LoadingStrategy... strategies) {
         if (ArrayUtils.isNotEmpty(strategies)) {
             ExtensionLoader.strategies = strategies;
@@ -218,6 +222,8 @@ public class ExtensionLoader<T> {
      * @see LoadingStrategy
      * @see Prioritized
      * @since 2.7.7
+     *
+     * 获取所有的扩展类加载策略
      */
     public static List<LoadingStrategy> getLoadingStrategies() {
         return asList(strategies);
@@ -240,6 +246,9 @@ public class ExtensionLoader<T> {
         this.scopeModel = scopeModel;
     }
 
+    /**
+     * 初始化用来创建扩展实例的策略
+     */
     private void initInstantiationStrategy() {
         for (ExtensionPostProcessor extensionPostProcessor : extensionPostProcessors) {
             if (extensionPostProcessor instanceof ScopeModelAccessor) {
@@ -320,12 +329,24 @@ public class ExtensionLoader<T> {
         return ClassUtils.getClassLoader(ExtensionLoader.class);
     }
 
+    /**
+     * 获取扩展类实例对应的名字
+     * @param extensionInstance
+     * @return
+     */
     public String getExtensionName(T extensionInstance) {
         return getExtensionName(extensionInstance.getClass());
     }
 
+    /**
+     * 获取扩展类的名字
+     * @param extensionClass
+     * @return
+     */
     public String getExtensionName(Class<?> extensionClass) {
+        // 先加载类
         getExtensionClasses();// load class
+        // 从缓存中获取
         return cachedNames.get(extensionClass);
     }
 
@@ -336,6 +357,7 @@ public class ExtensionLoader<T> {
      * @param key url parameter key which used to get extension point names
      * @return extension list which are activated.
      * @see #getActivateExtension(org.apache.dubbo.common.URL, String, String)
+     * 获取可激活的扩展
      */
     public List<T> getActivateExtension(URL url, String key) {
         return getActivateExtension(url, key, null);
@@ -348,6 +370,7 @@ public class ExtensionLoader<T> {
      * @param values extension point names
      * @return extension list which are activated
      * @see #getActivateExtension(org.apache.dubbo.common.URL, String[], String)
+     * 获取可激活的扩展
      */
     public List<T> getActivateExtension(URL url, String[] values) {
         return getActivateExtension(url, values, null);
@@ -361,6 +384,7 @@ public class ExtensionLoader<T> {
      * @param group group
      * @return extension list which are activated.
      * @see #getActivateExtension(org.apache.dubbo.common.URL, String[], String)
+     * 获取可激活的扩展
      */
     public List<T> getActivateExtension(URL url, String key, String group) {
         String value = url.getParameter(key);
@@ -375,6 +399,7 @@ public class ExtensionLoader<T> {
      * @param group  group
      * @return extension list which are activated
      * @see org.apache.dubbo.common.extension.Activate
+     * 获取可激活的扩展
      */
     public List<T> getActivateExtension(URL url, String[] values, String group) {
         checkDestroyed();
@@ -469,6 +494,10 @@ public class ExtensionLoader<T> {
         }
     }
 
+    /**
+     * 获取所有的可激活的扩展
+     * @return
+     */
     public List<T> getActivateExtensions() {
         checkDestroyed();
         List<T> activateExtensions = new ArrayList<>();
@@ -532,6 +561,7 @@ public class ExtensionLoader<T> {
      * In order to trigger extension load, call {@link #getExtension(String)} instead.
      *
      * @see #getExtension(String)
+     * 获取已经加载过的扩展实例，如果没有找到则返回null，不会尝试加载扩展
      */
     @SuppressWarnings("unchecked")
     public T getLoadedExtension(String name) {
@@ -564,11 +594,16 @@ public class ExtensionLoader<T> {
      * Usually {@link #getSupportedExtensions()} should be called in order to get all extensions.
      *
      * @see #getSupportedExtensions()
+     * 获取所有的已经加载过的扩展名字
      */
     public Set<String> getLoadedExtensions() {
         return Collections.unmodifiableSet(new TreeSet<>(cachedInstances.keySet()));
     }
 
+    /**
+     * 获取所有的已经加载过的扩展的实例
+     * @return
+     */
     public List<T> getLoadedExtensionInstances() {
         checkDestroyed();
         List<T> instances = new ArrayList<>();
@@ -637,6 +672,8 @@ public class ExtensionLoader<T> {
      *
      * @param name the name of extension
      * @return non-null
+     *
+     * 根据名字获取扩展，如果不存在扩展，则使用默认的扩展
      */
     public T getOrDefaultExtension(String name) {
         return containsExtension(name) ? getExtension(name) : getDefaultExtension();
@@ -644,6 +681,8 @@ public class ExtensionLoader<T> {
 
     /**
      * Return default extension, return <code>null</code> if it's not configured.
+     *
+     * 获取默认的扩展
      */
     public T getDefaultExtension() {
         getExtensionClasses();
@@ -653,6 +692,11 @@ public class ExtensionLoader<T> {
         return getExtension(cachedDefaultName);
     }
 
+    /**
+     * 是否包含指定名字的扩展
+     * @param name
+     * @return
+     */
     public boolean hasExtension(String name) {
         checkDestroyed();
         if (StringUtils.isEmpty(name)) {
@@ -662,12 +706,20 @@ public class ExtensionLoader<T> {
         return c != null;
     }
 
+    /**
+     * 获取所有支持的扩展实现
+     * @return
+     */
     public Set<String> getSupportedExtensions() {
         checkDestroyed();
         Map<String, Class<?>> classes = getExtensionClasses();
         return Collections.unmodifiableSet(new TreeSet<>(classes.keySet()));
     }
 
+    /**
+     * 获取所有支持的扩展的实例
+     * @return
+     */
     public Set<T> getSupportedExtensionInstances() {
         checkDestroyed();
         List<T> instances = new LinkedList<>();
@@ -684,6 +736,8 @@ public class ExtensionLoader<T> {
 
     /**
      * Return default extension name, return <code>null</code> if not configured.
+     *
+     * 获取默认扩展的名字
      */
     public String getDefaultExtensionName() {
         getExtensionClasses();
@@ -696,6 +750,8 @@ public class ExtensionLoader<T> {
      * @param name  extension name
      * @param clazz extension class
      * @throws IllegalStateException when extension with the same name has already been registered.
+     *
+     * 添加一个新的扩展
      */
     public void addExtension(String name, Class<?> clazz) {
         checkDestroyed();
@@ -774,6 +830,11 @@ public class ExtensionLoader<T> {
         }
     }
 
+    /**
+     * 获取自适应的扩展，也就是xxxx$Adaptive这样的扩展
+     * 先从缓存的实例中获取，找不到就创建自适应扩展
+     * @return
+     */
     @SuppressWarnings("unchecked")
     public T getAdaptiveExtension() {
         checkDestroyed();
@@ -789,6 +850,7 @@ public class ExtensionLoader<T> {
                 instance = cachedAdaptiveInstance.get();
                 if (instance == null) {
                     try {
+                        // 创建自适应扩展
                         instance = createAdaptiveExtension();
                         cachedAdaptiveInstance.set(instance);
                     } catch (Throwable t) {
@@ -854,7 +916,7 @@ public class ExtensionLoader<T> {
                 instance = postProcessAfterInitialization(instance, name);
             }
 
-            // 如果需要包装，则进行包装
+            // 如果允许包装，则对当前类进行包装
             if (wrap) {
                 List<Class<?>> wrapperClassesList = new ArrayList<>();
                 // cachedWrapperClasses中缓存了包装类，在从文件中读取并加载扩展实现类的时候缓存的
@@ -869,7 +931,7 @@ public class ExtensionLoader<T> {
                         Wrapper wrapper = wrapperClass.getAnnotation(Wrapper.class);
                         if (wrapper == null
                             || (ArrayUtils.contains(wrapper.matches(), name) && !ArrayUtils.contains(wrapper.mismatches(), name))) {
-                            // 将wrapperClass实例化，并对其进行set方法注入
+                            // 使用当前实例作为包装类构造方法的参数，将包装类进行实例化，然后进行set方法注入，这之后包装后的类才是我们需要的实例
                             instance = injectExtension((T) wrapperClass.getConstructor(type).newInstance(instance));
                             instance = postProcessAfterInitialization(instance, name);
                         }
@@ -1261,7 +1323,7 @@ public class ExtensionLoader<T> {
         if (clazz.isAnnotationPresent(Adaptive.class)) {
             cacheAdaptiveClass(clazz, overridden);
         }
-        // 如果是一个包装类，需要将包装类进行缓存
+        // 如果是一个包装类，则只需要将包装类进行缓存即可
         else if (isWrapperClass(clazz)) {
             cacheWrapperClass(clazz);
         }
@@ -1385,11 +1447,17 @@ public class ExtensionLoader<T> {
         return name.toLowerCase();
     }
 
+    /**
+     * 创建自适应扩展
+     * @return
+     */
     @SuppressWarnings("unchecked")
     private T createAdaptiveExtension() {
         try {
+            // 获取自适应扩展的Class对象，然后实例化
             T instance = (T) getAdaptiveExtensionClass().newInstance();
             instance = postProcessBeforeInitialization(instance, null);
+            // set注入
             instance = injectExtension(instance);
             instance = postProcessAfterInitialization(instance, null);
             initExtension(instance);
@@ -1399,27 +1467,40 @@ public class ExtensionLoader<T> {
         }
     }
 
+    /**
+     * 获取自适扩展的Class对象
+     * @return
+     */
     private Class<?> getAdaptiveExtensionClass() {
+        // 先加载对应的Class对象
         getExtensionClasses();
         if (cachedAdaptiveClass != null) {
             return cachedAdaptiveClass;
         }
+        // 创建自适应扩展的Class对象
         return cachedAdaptiveClass = createAdaptiveExtensionClass();
     }
 
+    /**
+     * 创建自适应扩展的Class对象
+     * @return
+     */
     private Class<?> createAdaptiveExtensionClass() {
         // Adaptive Classes' ClassLoader should be the same with Real SPI interface classes' ClassLoader
         ClassLoader classLoader = type.getClassLoader();
         try {
             if (NativeUtils.isNative()) {
+                // 尝试直接加载已有的xxxx$Adaptive类
                 return classLoader.loadClass(type.getName() + "$Adaptive");
             }
         } catch (Throwable ignore) {
 
         }
+        // 生成自适应扩展类的代码
         String code = new AdaptiveClassCodeGenerator(type, cachedDefaultName).generate();
         org.apache.dubbo.common.compiler.Compiler compiler = extensionDirector.getExtensionLoader(
             org.apache.dubbo.common.compiler.Compiler.class).getAdaptiveExtension();
+        // 编译生成的自适应扩展类的代码
         return compiler.compile(code, classLoader);
     }
 

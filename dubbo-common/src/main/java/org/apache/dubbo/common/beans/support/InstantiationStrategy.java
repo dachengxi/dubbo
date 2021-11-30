@@ -43,12 +43,20 @@ public class InstantiationStrategy {
         this.scopeModelAccessor = scopeModelAccessor;
     }
 
+    /**
+     * 实例化一个类
+     * @param type
+     * @param <T>
+     * @return
+     * @throws ReflectiveOperationException
+     */
     public <T> T instantiate(Class<T> type) throws ReflectiveOperationException {
 
         // should not use default constructor directly, maybe also has another constructor matched scope model arguments
         // 1. try to get default constructor
         Constructor<T> defaultConstructor = null;
         try {
+            // 默认构造方法
             defaultConstructor = type.getConstructor();
         } catch (NoSuchMethodException e) {
             // ignore no default constructor
@@ -85,11 +93,13 @@ public class InstantiationStrategy {
         }
 
         // create instance with arguments
+        // 构造方法的参数类型
         Class[] parameterTypes = targetConstructor.getParameterTypes();
         Object[] args = new Object[parameterTypes.length];
         for (int i = 0; i < parameterTypes.length; i++) {
             args[i] = getArgumentValueForType(parameterTypes[i]);
         }
+        // 实例化
         return (T) targetConstructor.newInstance(args);
     }
 
