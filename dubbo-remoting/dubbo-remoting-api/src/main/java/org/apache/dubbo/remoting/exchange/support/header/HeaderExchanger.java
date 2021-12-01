@@ -28,19 +28,47 @@ import org.apache.dubbo.remoting.transport.DecodeHandler;
 /**
  * DefaultMessenger
  *
- *
+ * 信息交换层Exchanger的默认实现
  */
 public class HeaderExchanger implements Exchanger {
 
     public static final String NAME = "header";
 
+    /**
+     * 客户端的链接操作，客户端连接到服务端
+     * @param url
+     * @param handler
+     * @return
+     * @throws RemotingException
+     */
     @Override
     public ExchangeClient connect(URL url, ExchangeHandler handler) throws RemotingException {
+        /*
+            ChannelHandler exchangeHandler = new HeaderExchangeHandler(handler);
+            ChannelHandler decodeHandler = new DecodeHandler(exchangeHandler);
+            Client client = Transporters.connect(url, new DecodeHandler(new HeaderExchangeHandler(handler)));
+            HeaderExchangeClient exchangeClient = new HeaderExchangeClient(client, true);
+            return exchangeClient;
+         */
         return new HeaderExchangeClient(Transporters.connect(url, new DecodeHandler(new HeaderExchangeHandler(handler))), true);
     }
 
+    /**
+     * 服务端的绑定操作，服务端绑定端口、暴露服务
+     * @param url
+     * @param handler
+     * @return
+     * @throws RemotingException
+     */
     @Override
     public ExchangeServer bind(URL url, ExchangeHandler handler) throws RemotingException {
+        /*
+            ChannelHandler exchangeHandler = new HeaderExchangeHandler(handler);
+            ChannelHandler decodeHandler = new DecodeHandler(exchangeHandler);
+            RemotingServer server = Transporters.bind(url, decodeHandler);
+            HeaderExchangeServer exchangeServer = new HeaderExchangeServer(server);
+            return exchangeServer;
+         */
         return new HeaderExchangeServer(Transporters.bind(url, new DecodeHandler(new HeaderExchangeHandler(handler))));
     }
 

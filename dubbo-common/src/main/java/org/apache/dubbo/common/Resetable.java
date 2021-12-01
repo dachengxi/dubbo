@@ -18,6 +18,7 @@ package org.apache.dubbo.common;
 
 /**
  * Resetable.
+ * 可重置的
  */
 public interface Resetable {
 
@@ -25,6 +26,7 @@ public interface Resetable {
      * reset.
      *
      * @param url
+     * 重置
      */
     void reset(URL url);
 

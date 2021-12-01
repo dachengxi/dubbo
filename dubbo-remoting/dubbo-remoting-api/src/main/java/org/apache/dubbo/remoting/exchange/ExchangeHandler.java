@@ -24,6 +24,7 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * ExchangeHandler. (API, Prototype, ThreadSafe)
+ * 信息交换处理器，是上层使用的
  */
 public interface ExchangeHandler extends ChannelHandler, TelnetHandler {
 
@@ -34,6 +35,8 @@ public interface ExchangeHandler extends ChannelHandler, TelnetHandler {
      * @param request
      * @return response
      * @throws RemotingException
+     *
+     * 处理请求，返回请求结果
      */
     CompletableFuture<Object> reply(ExchangeChannel channel, Object request) throws RemotingException;
 

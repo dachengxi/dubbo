@@ -27,6 +27,8 @@ import java.net.InetSocketAddress;
  * @see org.apache.dubbo.remoting.Channel
  * @see org.apache.dubbo.remoting.Client
  * @see RemotingServer
+ *
+ * 端，比如客户端、服务端这些都是端，端是对它们的抽象
  */
 public interface Endpoint {
 
@@ -34,6 +36,8 @@ public interface Endpoint {
      * get url.
      *
      * @return url
+     *
+     * 获取端的url
      */
     URL getUrl();
 
@@ -41,6 +45,8 @@ public interface Endpoint {
      * get channel handler.
      *
      * @return channel handler
+     *
+     * 获取端的通道处理器
      */
     ChannelHandler getChannelHandler();
 
@@ -48,6 +54,8 @@ public interface Endpoint {
      * get local address.
      *
      * @return local address.
+     *
+     * 获取端的本地地址
      */
     InetSocketAddress getLocalAddress();
 
@@ -56,6 +64,8 @@ public interface Endpoint {
      *
      * @param message
      * @throws RemotingException
+     *
+     * 发送消息
      */
     void send(Object message) throws RemotingException;
 
@@ -64,25 +74,36 @@ public interface Endpoint {
      *
      * @param message
      * @param sent    already sent to socket?
+     *
+     * 发送消息
      */
     void send(Object message, boolean sent) throws RemotingException;
 
     /**
      * close the channel.
+     *
+     * 关闭通道
      */
     void close();
 
     /**
      * Graceful close the channel.
+     *
+     * 优雅关闭通道
      */
     void close(int timeout);
 
+    /**
+     * 开始关闭
+     */
     void startClose();
 
     /**
      * is closed.
      *
      * @return closed
+     *
+     * 通道是否已关闭
      */
     boolean isClosed();
 

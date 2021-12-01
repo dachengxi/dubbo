@@ -29,6 +29,12 @@ import org.apache.dubbo.remoting.exchange.support.header.HeaderExchanger;
  * <p>
  * <a href="http://en.wikipedia.org/wiki/Message_Exchange_Pattern">Message Exchange Pattern</a>
  * <a href="http://en.wikipedia.org/wiki/Request-response">Request-Response</a>
+ *
+ * 信息交换层
+ * 将服务之间的信息交换封装成请求-响应模式，不管底层使用的是Netty还是基于Tomcat的Http服务器来做信息交换，
+ * 对于上层来看都是基于请求-响应模式的。
+ *
+ * Exchanger是一个扩展接口，默认的扩展实现的HeaderExchanger。
  */
 @SPI(value = HeaderExchanger.NAME, scope = ExtensionScope.FRAMEWORK)
 public interface Exchanger {
@@ -39,6 +45,8 @@ public interface Exchanger {
      * @param url
      * @param handler
      * @return message server
+     *
+     * 抽象服务端的绑定操作，服务端绑定端口、暴露服务
      */
     @Adaptive({Constants.EXCHANGER_KEY})
     ExchangeServer bind(URL url, ExchangeHandler handler) throws RemotingException;
@@ -49,6 +57,8 @@ public interface Exchanger {
      * @param url
      * @param handler
      * @return message channel
+     *
+     * 抽象客户端的链接操作，客户端连接到服务端
      */
     @Adaptive({Constants.EXCHANGER_KEY})
     ExchangeClient connect(URL url, ExchangeHandler handler) throws RemotingException;

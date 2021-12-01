@@ -27,6 +27,8 @@ import java.util.Collection;
  * <a href="http://en.wikipedia.org/wiki/Client%E2%80%93server_model">Client/Server</a>
  *
  * @see org.apache.dubbo.remoting.Transporter#bind(org.apache.dubbo.common.URL, ChannelHandler)
+ *
+ * 对服务端的抽象
  */
 public interface RemotingServer extends Endpoint, Resetable, IdleSensible {
 
@@ -34,6 +36,8 @@ public interface RemotingServer extends Endpoint, Resetable, IdleSensible {
      * is bound.
      *
      * @return bound
+     *
+     * 是否已绑定端口
      */
     boolean isBound();
 
@@ -41,6 +45,8 @@ public interface RemotingServer extends Endpoint, Resetable, IdleSensible {
      * get channels.
      *
      * @return channels
+     *
+     * 获取服务端所有的通道
      */
     Collection<Channel> getChannels();
 
@@ -49,6 +55,8 @@ public interface RemotingServer extends Endpoint, Resetable, IdleSensible {
      *
      * @param remoteAddress
      * @return channel
+     *
+     * 获取指定地址的通道
      */
     Channel getChannel(InetSocketAddress remoteAddress);
 

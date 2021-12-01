@@ -24,11 +24,15 @@ import org.apache.dubbo.common.Resetable;
  * <a href="http://en.wikipedia.org/wiki/Client%E2%80%93server_model">Client/Server</a>
  *
  * @see org.apache.dubbo.remoting.Transporter#connect(org.apache.dubbo.common.URL, ChannelHandler)
+ *
+ * 对客户端的抽象
  */
 public interface Client extends Endpoint, Channel, Resetable, IdleSensible {
 
     /**
      * reconnect.
+     *
+     * 重新连接
      */
     void reconnect() throws RemotingException;
 

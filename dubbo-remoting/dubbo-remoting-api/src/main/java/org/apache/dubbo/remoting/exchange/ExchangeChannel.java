@@ -24,6 +24,8 @@ import java.util.concurrent.ExecutorService;
 
 /**
  * ExchangeChannel. (API/SPI, Prototype, ThreadSafe)
+ *
+ * 信息交换通道的抽象，供上层使用
  */
 public interface ExchangeChannel extends Channel {
 
@@ -33,6 +35,8 @@ public interface ExchangeChannel extends Channel {
      * @param request
      * @return response future
      * @throws RemotingException
+     *
+     * 发送请求
      */
     @Deprecated
     CompletableFuture<Object> request(Object request) throws RemotingException;
@@ -44,6 +48,8 @@ public interface ExchangeChannel extends Channel {
      * @param timeout
      * @return response future
      * @throws RemotingException
+     *
+     * 发送请求
      */
     @Deprecated
     CompletableFuture<Object> request(Object request, int timeout) throws RemotingException;
@@ -54,6 +60,8 @@ public interface ExchangeChannel extends Channel {
      * @param request
      * @return response future
      * @throws RemotingException
+     *
+     * 发送请求
      */
     CompletableFuture<Object> request(Object request, ExecutorService executor) throws RemotingException;
 
@@ -64,6 +72,8 @@ public interface ExchangeChannel extends Channel {
      * @param timeout
      * @return response future
      * @throws RemotingException
+     *
+     * 发送请求
      */
     CompletableFuture<Object> request(Object request, int timeout, ExecutorService executor) throws RemotingException;
 
@@ -71,6 +81,8 @@ public interface ExchangeChannel extends Channel {
      * get message handler.
      *
      * @return message handler
+     *
+     * 获取信息交换处理器
      */
     ExchangeHandler getExchangeHandler();
 
@@ -78,6 +90,8 @@ public interface ExchangeChannel extends Channel {
      * graceful close.
      *
      * @param timeout
+     *
+     * 关闭信息交换通道
      */
     @Override
     void close(int timeout);

@@ -24,6 +24,9 @@ import java.net.InetSocketAddress;
  * @see org.apache.dubbo.remoting.Client
  * @see RemotingServer#getChannels()
  * @see RemotingServer#getChannel(InetSocketAddress)
+ *
+ * Channel是对网络通道的抽象，通讯的两端通过通道进行数据交换，
+ * 通道也可以理解为是一个端，所以这里Channel继承了Endpoint
  */
 public interface Channel extends Endpoint {
 
@@ -31,6 +34,8 @@ public interface Channel extends Endpoint {
      * get remote address.
      *
      * @return remote address.
+     *
+     * 获取远程地址
      */
     InetSocketAddress getRemoteAddress();
 
@@ -38,6 +43,8 @@ public interface Channel extends Endpoint {
      * is connected.
      *
      * @return connected
+     *
+     * 通道是否已连接
      */
     boolean isConnected();
 
