@@ -38,6 +38,8 @@ import static org.apache.dubbo.common.constants.CommonConstants.TIMEOUT_KEY;
 
 /**
  * ExchangeReceiver
+ *
+ * 信息交换层的通道的默认实现
  */
 final class HeaderExchangeChannel implements ExchangeChannel {
 
@@ -45,6 +47,9 @@ final class HeaderExchangeChannel implements ExchangeChannel {
 
     private static final String CHANNEL_KEY = HeaderExchangeChannel.class.getName() + ".CHANNEL";
 
+    /**
+     * 信息交换通道持有的网络通道
+     */
     private final Channel channel;
 
     private volatile boolean closed = false;
@@ -56,6 +61,11 @@ final class HeaderExchangeChannel implements ExchangeChannel {
         this.channel = channel;
     }
 
+    /**
+     * 获取信息交换通道或者创建一个信息交换通道
+     * @param ch
+     * @return
+     */
     static HeaderExchangeChannel getOrAddChannel(Channel ch) {
         if (ch == null) {
             return null;
@@ -82,11 +92,23 @@ final class HeaderExchangeChannel implements ExchangeChannel {
         }
     }
 
+    /**
+     * 信息交换通道发送消息
+     * @param message
+     * @throws RemotingException
+     */
     @Override
     public void send(Object message) throws RemotingException {
         send(message, false);
     }
 
+    /**
+     * 信息交换通道发送消息
+     * @param message
+     * @param sent    already sent to socket?
+     *
+     * @throws RemotingException
+     */
     @Override
     public void send(Object message, boolean sent) throws RemotingException {
         if (closed) {
@@ -105,21 +127,49 @@ final class HeaderExchangeChannel implements ExchangeChannel {
         }
     }
 
+    /**
+     * 信息交换通道发送请求
+     * @param request
+     * @return
+     * @throws RemotingException
+     */
     @Override
     public CompletableFuture<Object> request(Object request) throws RemotingException {
         return request(request, null);
     }
 
+    /**
+     * 信息交换通道发送请求
+     * @param request
+     * @param timeout
+     * @return
+     * @throws RemotingException
+     */
     @Override
     public CompletableFuture<Object> request(Object request, int timeout) throws RemotingException {
         return request(request, timeout, null);
     }
 
+    /**
+     * 信息交换通道发送请求
+     * @param request
+     * @param executor
+     * @return
+     * @throws RemotingException
+     */
     @Override
     public CompletableFuture<Object> request(Object request, ExecutorService executor) throws RemotingException {
         return request(request, channel.getUrl().getPositiveParameter(TIMEOUT_KEY, DEFAULT_TIMEOUT), executor);
     }
 
+    /**
+     * 信息交换通道发送请求
+     * @param request
+     * @param timeout
+     * @param executor
+     * @return
+     * @throws RemotingException
+     */
     @Override
     public CompletableFuture<Object> request(Object request, int timeout, ExecutorService executor) throws RemotingException {
         if (closed) {
@@ -130,13 +180,16 @@ final class HeaderExchangeChannel implements ExchangeChannel {
         req.setVersion(Version.getProtocolVersion());
         req.setTwoWay(true);
         req.setData(request);
+        // 将发送请求封装成一个DefaultFuture任务
         DefaultFuture future = DefaultFuture.newFuture(channel, req, timeout, executor);
         try {
+            // 使用通道发送请求
             channel.send(req);
         } catch (RemotingException e) {
             future.cancel();
             throw e;
         }
+        // 返回DefaultFuture任务
         return future;
     }
 

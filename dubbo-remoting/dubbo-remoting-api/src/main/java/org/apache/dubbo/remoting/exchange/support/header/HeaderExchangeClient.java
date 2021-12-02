@@ -44,10 +44,19 @@ import static org.apache.dubbo.remoting.utils.UrlUtils.getIdleTimeout;
 
 /**
  * DefaultMessageClient
+ *
+ * 信息交换客户端的默认实现
  */
 public class HeaderExchangeClient implements ExchangeClient {
 
+    /**
+     * 信息交换客户端持有的底层的客户端实现
+     */
     private final Client client;
+
+    /**
+     * 信息交换客户端持有的信息交换通道
+     */
     private final ExchangeChannel channel;
 
     public static GlobalResourceInitializer<HashedWheelTimer> IDLE_CHECK_TIMER = new GlobalResourceInitializer<>(() ->
@@ -55,7 +64,14 @@ public class HeaderExchangeClient implements ExchangeClient {
             TimeUnit.SECONDS, TICKS_PER_WHEEL),
         timer -> timer.stop());
 
+    /**
+     * 重新连接的定时器
+     */
     private Timeout reconnectTimer;
+
+    /**
+     * 心跳定时器
+     */
     private Timeout heartBeatTimer;
 
     public HeaderExchangeClient(Client client, boolean startTimer) {
@@ -70,66 +86,134 @@ public class HeaderExchangeClient implements ExchangeClient {
         }
     }
 
+    /**
+     * 信息交换客户端发送请求
+     * @param request
+     * @return
+     * @throws RemotingException
+     */
     @Override
     public CompletableFuture<Object> request(Object request) throws RemotingException {
         return channel.request(request);
     }
 
+    /**
+     * 获取信息交换客户端的地址
+     * @return
+     */
     @Override
     public URL getUrl() {
         return channel.getUrl();
     }
 
+    /**
+     * 获取信息交换客户端的远程的地址
+     * @return
+     */
     @Override
     public InetSocketAddress getRemoteAddress() {
         return channel.getRemoteAddress();
     }
 
+    /**
+     * 信息交换客户端发送请求
+     * @param request
+     * @param timeout
+     * @return
+     * @throws RemotingException
+     */
     @Override
     public CompletableFuture<Object> request(Object request, int timeout) throws RemotingException {
         return channel.request(request, timeout);
     }
 
+    /**
+     * 信息交换客户端发送请求
+     * @param request
+     * @param executor
+     * @return
+     * @throws RemotingException
+     */
     @Override
     public CompletableFuture<Object> request(Object request, ExecutorService executor) throws RemotingException {
         return channel.request(request, executor);
     }
 
+    /**
+     * 信息交换客户端发送请求
+     * @param request
+     * @param timeout
+     * @param executor
+     * @return
+     * @throws RemotingException
+     */
     @Override
     public CompletableFuture<Object> request(Object request, int timeout, ExecutorService executor) throws RemotingException {
         return channel.request(request, timeout, executor);
     }
 
+    /**
+     * 获取信息交换客户端的通道处理器
+     * @return
+     */
     @Override
     public ChannelHandler getChannelHandler() {
         return channel.getChannelHandler();
     }
 
+    /**
+     * 信息交换客户端是否已连接
+     * @return
+     */
     @Override
     public boolean isConnected() {
         return channel.isConnected();
     }
 
+    /**
+     * 获取信息交换客户端本地地址
+     * @return
+     */
     @Override
     public InetSocketAddress getLocalAddress() {
         return channel.getLocalAddress();
     }
 
+    /**
+     * 获取信息交换客户端的信息交换处理器
+     * @return
+     */
     @Override
     public ExchangeHandler getExchangeHandler() {
         return channel.getExchangeHandler();
     }
 
+    /**
+     * 信息交换客户端发送消息
+     * @param message
+     * @throws RemotingException
+     */
     @Override
     public void send(Object message) throws RemotingException {
         channel.send(message);
     }
 
+    /**
+     * 信息交换客户端发送消息
+     * @param message
+     * @param sent    already sent to socket?
+     *
+     * @throws RemotingException
+     */
     @Override
     public void send(Object message, boolean sent) throws RemotingException {
         channel.send(message, sent);
     }
 
+    /**
+     * 信息交换客户端的通道是否已关闭
+     * @return
+     */
     @Override
     public boolean isClosed() {
         return channel.isClosed();

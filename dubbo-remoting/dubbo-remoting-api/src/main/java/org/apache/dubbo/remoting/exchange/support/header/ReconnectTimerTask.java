@@ -24,6 +24,8 @@ import org.apache.dubbo.remoting.Client;
 
 /**
  * ReconnectTimerTask
+ *
+ * 重连的定时任务
  */
 public class ReconnectTimerTask extends AbstractTimerTask {
 

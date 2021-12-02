@@ -27,6 +27,8 @@ import static org.apache.dubbo.common.constants.CommonConstants.HEARTBEAT_EVENT;
 
 /**
  * HeartbeatTimerTask
+ *
+ * 心跳定时任务
  */
 public class HeartbeatTimerTask extends AbstractTimerTask {
 

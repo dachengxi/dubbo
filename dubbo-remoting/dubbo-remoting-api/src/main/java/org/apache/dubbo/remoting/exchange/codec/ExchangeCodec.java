@@ -45,6 +45,8 @@ import java.io.InputStream;
 
 /**
  * ExchangeCodec.
+ *
+ * 信息交换层的编解码器
  */
 public class ExchangeCodec extends TelnetCodec {
 
@@ -65,25 +67,52 @@ public class ExchangeCodec extends TelnetCodec {
         return MAGIC;
     }
 
+    /**
+     * 编码
+     * @param channel
+     * @param buffer
+     * @param msg
+     * @throws IOException
+     */
     @Override
     public void encode(Channel channel, ChannelBuffer buffer, Object msg) throws IOException {
+        // 对请求进行编码
         if (msg instanceof Request) {
             encodeRequest(channel, buffer, (Request) msg);
         } else if (msg instanceof Response) {
+            // 对响应进行编码
             encodeResponse(channel, buffer, (Response) msg);
         } else {
+            // 其他类型的编码
             super.encode(channel, buffer, msg);
         }
     }
 
+    /**
+     * 解码
+     * @param channel
+     * @param buffer
+     * @return
+     * @throws IOException
+     */
     @Override
     public Object decode(Channel channel, ChannelBuffer buffer) throws IOException {
         int readable = buffer.readableBytes();
         byte[] header = new byte[Math.min(readable, HEADER_LENGTH)];
         buffer.readBytes(header);
+        // 解码
         return decode(channel, buffer, readable, header);
     }
 
+    /**
+     * 解码
+     * @param channel
+     * @param buffer
+     * @param readable
+     * @param header
+     * @return
+     * @throws IOException
+     */
     @Override
     protected Object decode(Channel channel, ChannelBuffer buffer, int readable, byte[] header) throws IOException {
         // check magic number.
@@ -223,11 +252,21 @@ public class ExchangeCodec extends TelnetCodec {
         return req.getData();
     }
 
+    /**
+     * 对请求进行编码
+     * @param channel
+     * @param buffer
+     * @param req
+     * @throws IOException
+     */
     protected void encodeRequest(Channel channel, ChannelBuffer buffer, Request req) throws IOException {
+        // 获取序列化方式，默认是hessian2
         Serialization serialization = getSerialization(channel, req);
         // header.
+        // header长度16个字节
         byte[] header = new byte[HEADER_LENGTH];
         // set magic number.
+        // 魔数，2个字节
         Bytes.short2bytes(MAGIC, header);
 
         // set request and serialization flag.
