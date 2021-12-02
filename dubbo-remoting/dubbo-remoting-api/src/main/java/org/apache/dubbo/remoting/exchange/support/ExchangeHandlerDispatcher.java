@@ -29,11 +29,17 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * ExchangeHandlerDispatcher
+ *
+ * 信息交换处理器的分发器，在通道有事件发生的时候，会将事件分发给持有的通道处理器，
+ * 让通道处理器进行事件的处理
  */
 public class ExchangeHandlerDispatcher implements ExchangeHandler {
 
     private final ReplierDispatcher replierDispatcher;
 
+    /**
+     * 通道处理器的分发器
+     */
     private final ChannelHandlerDispatcher handlerDispatcher;
 
     private final TelnetHandler telnetHandler;

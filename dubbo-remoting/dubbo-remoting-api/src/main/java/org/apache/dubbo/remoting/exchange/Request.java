@@ -24,21 +24,44 @@ import static org.apache.dubbo.common.constants.CommonConstants.HEARTBEAT_EVENT;
 
 /**
  * Request.
+ *
+ * 信息交换层对请求的抽象
  */
 public class Request {
 
+    /**
+     * 请求ID
+     */
     private static final AtomicLong INVOKE_ID = new AtomicLong(0);
 
+    /**
+     * 请求ID
+     */
     private final long mId;
 
+    /**
+     * 请求的版本号
+     */
     private String mVersion;
 
+    /**
+     * 请求双向标识，如果为true，服务端收到客户端请求后，需要向客户端进行响应
+     */
     private boolean mTwoWay = true;
 
+    /**
+     * 请求事件标识，比如心跳请求、只读请求中该标识为true
+     */
     private boolean mEvent = false;
 
+    /**
+     * 请求有问题的标识
+     */
     private boolean mBroken = false;
 
+    /**
+     * 请求体
+     */
     private Object mData;
 
     public Request() {

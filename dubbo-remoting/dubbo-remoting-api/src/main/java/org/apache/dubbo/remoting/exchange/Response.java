@@ -20,6 +20,8 @@ import static org.apache.dubbo.common.constants.CommonConstants.HEARTBEAT_EVENT;
 
 /**
  * Response
+ *
+ * 信息交换层对响应的抽象
  */
 public class Response {
 
@@ -78,16 +80,34 @@ public class Response {
      */
     public static final byte SERVER_THREADPOOL_EXHAUSTED_ERROR = 100;
 
+    /**
+     * 响应ID，和请求ID对应
+     */
     private long mId = 0;
 
+    /**
+     * 响应的版本号，和请求的版本号对应
+     */
     private String mVersion;
 
+    /**
+     * 响应状态码
+     */
     private byte mStatus = OK;
 
+    /**
+     * 请求事件标识，比如心跳请求、只读请求中该标识为true
+     */
     private boolean mEvent = false;
 
+    /**
+     * 响应的错误消息
+     */
     private String mErrorMsg;
 
+    /**
+     * 响应体
+     */
     private Object mResult;
 
     public Response() {

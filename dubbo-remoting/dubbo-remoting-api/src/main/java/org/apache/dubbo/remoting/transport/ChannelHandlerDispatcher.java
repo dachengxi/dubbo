@@ -28,11 +28,17 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * ChannelListenerDispatcher
+ *
+ * 通道处理器的分发器，通道上有事件发生的时候，需要遍历分发器持有的所有的通道处理器，
+ * 让每个通道处理器都处理发生的事件
  */
 public class ChannelHandlerDispatcher implements ChannelHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(ChannelHandlerDispatcher.class);
 
+    /**
+     * 持有多个通道处理器
+     */
     private final Collection<ChannelHandler> channelHandlers = new CopyOnWriteArraySet<ChannelHandler>();
 
     public ChannelHandlerDispatcher() {

@@ -41,11 +41,16 @@ import static org.apache.dubbo.common.constants.CommonConstants.READONLY_EVENT;
 
 /**
  * ExchangeReceiver
+ *
+ * 信息交换处理器的默认实现
  */
 public class HeaderExchangeHandler implements ChannelHandlerDelegate {
 
     protected static final Logger logger = LoggerFactory.getLogger(HeaderExchangeHandler.class);
 
+    /**
+     * 信息交换处理器
+     */
     private final ExchangeHandler handler;
 
     public HeaderExchangeHandler(ExchangeHandler handler) {
@@ -55,12 +60,24 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
         this.handler = handler;
     }
 
+    /**
+     * 信息交换通道处理器处理收到的响应信息，交给DefaultFuture处理，DefaultFuture会
+     * 根据响应的状态来设置DefaultFuture的状态
+     * @param channel
+     * @param response
+     * @throws RemotingException
+     */
     static void handleResponse(Channel channel, Response response) throws RemotingException {
         if (response != null && !response.isHeartbeat()) {
             DefaultFuture.received(channel, response);
         }
     }
 
+    /**
+     * 判断是否是客户端
+     * @param channel
+     * @return
+     */
     private static boolean isClientSide(Channel channel) {
         InetSocketAddress address = channel.getRemoteAddress();
         URL url = channel.getUrl();
@@ -69,12 +86,24 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
                         .equals(NetUtils.filterLocalHost(address.getAddress().getHostAddress()));
     }
 
+    /**
+     * 处理事件
+     * @param channel
+     * @param req
+     * @throws RemotingException
+     */
     void handlerEvent(Channel channel, Request req) throws RemotingException {
         if (req.getData() != null && req.getData().equals(READONLY_EVENT)) {
             channel.setAttribute(Constants.CHANNEL_ATTRIBUTE_READONLY_KEY, Boolean.TRUE);
         }
     }
 
+    /**
+     * 处理请求
+     * @param channel
+     * @param req
+     * @throws RemotingException
+     */
     void handleRequest(final ExchangeChannel channel, Request req) throws RemotingException {
         Response res = new Response(req.getId(), req.getVersion());
         if (req.isBroken()) {
@@ -119,12 +148,24 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
         }
     }
 
+    /**
+     * 信息交换处理器来处理已连接事件
+     * @param channel channel.
+     *
+     * @throws RemotingException
+     */
     @Override
     public void connected(Channel channel) throws RemotingException {
         ExchangeChannel exchangeChannel = HeaderExchangeChannel.getOrAddChannel(channel);
         handler.connected(exchangeChannel);
     }
 
+    /**
+     * 信息交换处理器来处理断开连接的事件
+     * @param channel channel.
+     *
+     * @throws RemotingException
+     */
     @Override
     public void disconnected(Channel channel) throws RemotingException {
         ExchangeChannel exchangeChannel = HeaderExchangeChannel.getOrAddChannel(channel);
@@ -136,6 +177,13 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
         }
     }
 
+    /**
+     * 信息交换处理器处理发送消息的事件
+     * @param channel channel.
+     * @param message message.
+     *
+     * @throws RemotingException
+     */
     @Override
     public void sent(Channel channel, Object message) throws RemotingException {
         Throwable exception = null;
@@ -146,6 +194,7 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
             exception = t;
             HeaderExchangeChannel.removeChannelIfDisconnected(channel);
         }
+        // 如果是请求，还需要调用DefaultFuture的发送方法，来记录发送的时间
         if (message instanceof Request) {
             Request request = (Request) message;
             DefaultFuture.sent(channel, request);
@@ -162,15 +211,25 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
         }
     }
 
+    /**
+     * 信息交换通道处理接收到消息的事件
+     * @param channel channel.
+     * @param message message.
+     *
+     * @throws RemotingException
+     */
     @Override
     public void received(Channel channel, Object message) throws RemotingException {
         final ExchangeChannel exchangeChannel = HeaderExchangeChannel.getOrAddChannel(channel);
+        // 请求
         if (message instanceof Request) {
             // handle request.
             Request request = (Request) message;
+            // 请求是个事件
             if (request.isEvent()) {
                 handlerEvent(channel, request);
             } else {
+                // 双向的请求
                 if (request.isTwoWay()) {
                     handleRequest(exchangeChannel, request);
                 } else {
@@ -180,6 +239,7 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
         } else if (message instanceof Response) {
             handleResponse(channel, (Response) message);
         } else if (message instanceof String) {
+            // 响应
             if (isClientSide(channel)) {
                 Exception e = new Exception("Dubbo client can not supported string message: " + message + " in channel: " + channel + ", url: " + channel.getUrl());
                 logger.error(e.getMessage(), e);

@@ -52,11 +52,16 @@ import static org.apache.dubbo.remoting.utils.UrlUtils.getIdleTimeout;
 
 /**
  * ExchangeServerImpl
+ *
+ * 信息交换服务端的默认实现
  */
 public class HeaderExchangeServer implements ExchangeServer {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
+    /**
+     * 信息交换服务端持有的底层的远程服务端对象
+     */
     private final RemotingServer server;
     private AtomicBoolean closed = new AtomicBoolean(false);
 
@@ -65,6 +70,9 @@ public class HeaderExchangeServer implements ExchangeServer {
             TimeUnit.SECONDS, TICKS_PER_WHEEL),
         timer -> timer.stop());
 
+    /**
+     * 服务端用来关闭空闲连接的定时器
+     */
     private Timeout closeTimer;
 
     public HeaderExchangeServer(RemotingServer server) {
@@ -77,11 +85,19 @@ public class HeaderExchangeServer implements ExchangeServer {
         return server;
     }
 
+    /**
+     * 服务端是否已经关闭
+     * @return
+     */
     @Override
     public boolean isClosed() {
         return server.isClosed();
     }
 
+    /**
+     * 服务端是否正在运行中，只要存在一个客户端连接，就是运行中
+     * @return
+     */
     private boolean isRunning() {
         Collection<Channel> channels = getChannels();
         for (Channel channel : channels) {
@@ -98,6 +114,9 @@ public class HeaderExchangeServer implements ExchangeServer {
         return false;
     }
 
+    /**
+     * 关闭服务端
+     */
     @Override
     public void close() {
         if (!closed.compareAndSet(false, true)) {
@@ -107,6 +126,10 @@ public class HeaderExchangeServer implements ExchangeServer {
         server.close();
     }
 
+    /**
+     * 关闭服务端
+     * @param timeout
+     */
     @Override
     public void close(final int timeout) {
         if (!closed.compareAndSet(false, true)) {
@@ -270,6 +293,10 @@ public class HeaderExchangeServer implements ExchangeServer {
         }
     }
 
+    /**
+     * 如果服务端支持空闲连接管理，就创建空闲连接检查的定时任务
+     * @param url
+     */
     private void startIdleCheckTask(URL url) {
         if (!server.canHandleIdle()) {
             AbstractTimerTask.ChannelProvider cp = () -> unmodifiableCollection(HeaderExchangeServer.this.getChannels());
