@@ -42,6 +42,10 @@ import static org.apache.dubbo.common.BaseServiceMetadata.keyWithoutGroup;
 
 public class CodecSupport {
     private static final Logger logger = LoggerFactory.getLogger(CodecSupport.class);
+
+    /**
+     * 缓存序列化方式
+     */
     private static Map<Byte, Serialization> ID_SERIALIZATION_MAP = new HashMap<Byte, Serialization>();
     private static Map<Byte, String> ID_SERIALIZATIONNAME_MAP = new HashMap<Byte, String>();
     private static Map<String, Byte> SERIALIZATIONNAME_ID_MAP = new HashMap<String, Byte>();
@@ -85,6 +89,13 @@ public class CodecSupport {
                 url.getParameter(Constants.SERIALIZATION_KEY, Constants.DEFAULT_REMOTING_SERIALIZATION));
     }
 
+    /**
+     * 获取序列化方式
+     * @param url
+     * @param id
+     * @return
+     * @throws IOException
+     */
     public static Serialization getSerialization(URL url, Byte id) throws IOException {
         Serialization result = getSerializationById(id);
         if (result == null) {
@@ -93,8 +104,19 @@ public class CodecSupport {
         return result;
     }
 
+    /**
+     * 反序列化数据
+     * @param url
+     * @param is
+     * @param proto
+     * @return
+     * @throws IOException
+     */
     public static ObjectInput deserialize(URL url, InputStream is, byte proto) throws IOException {
+        // 获取序列化方式
         Serialization s = getSerialization(url, proto);
+
+        // 反序列化
         return s.deserialize(url, is);
     }
 
