@@ -34,6 +34,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * NettyServerHandler.
+ *
+ * Netty服务端的处理器
  */
 @io.netty.channel.ChannelHandler.Sharable
 public class NettyServerHandler extends ChannelDuplexHandler {
@@ -41,11 +43,18 @@ public class NettyServerHandler extends ChannelDuplexHandler {
     /**
      * the cache for alive worker channel.
      * <ip:port, dubbo channel>
+     *
+     * 缓存了存活的worker线程对应的网络通道
+     * key：ip加端口
+     * value：Dubbo的通道
      */
     private final Map<String, Channel> channels = new ConcurrentHashMap<String, Channel>();
 
     private final URL url;
 
+    /**
+     * 通道处理器
+     */
     private final ChannelHandler handler;
 
     public NettyServerHandler(URL url, ChannelHandler handler) {
@@ -91,17 +100,35 @@ public class NettyServerHandler extends ChannelDuplexHandler {
         }
     }
 
+    /**
+     * 通道中有数据可读
+     * @param ctx
+     * @param msg
+     * @throws Exception
+     */
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        // 将Netty的通道封装成Dubbo的NettyChannel
         NettyChannel channel = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
+
+        // 将数据交给Dubbo的通道处理器来处理
         handler.received(channel, msg);
     }
 
 
+    /**
+     * 通道中有数据可写
+     * @param ctx
+     * @param msg
+     * @param promise
+     * @throws Exception
+     */
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+        // 写数据
         super.write(ctx, msg, promise);
         NettyChannel channel = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
+        // 将数据交给Dubbo的通道处理器来处理
         handler.sent(channel, msg);
     }
 

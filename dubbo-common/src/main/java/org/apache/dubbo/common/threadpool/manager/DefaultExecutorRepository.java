@@ -59,6 +59,9 @@ public class DefaultExecutorRepository implements ExecutorRepository, ExtensionA
 
     private int DEFAULT_SCHEDULER_SIZE = Runtime.getRuntime().availableProcessors();
 
+    /**
+     * 共享线程池
+     */
     private final ExecutorService sharedExecutor;
     private final ScheduledExecutorService sharedScheduledExecutor;
 
@@ -76,6 +79,12 @@ public class DefaultExecutorRepository implements ExecutorRepository, ExtensionA
 
     private ScheduledExecutorService metadataRetryExecutor;
 
+    /**
+     * 缓存线程池
+     * key1：固定的EXECUTOR_SERVICE_COMPONENT_KEY
+     * key2：线程池关联服务的端口
+     * value：线程池
+     */
     private ConcurrentMap<String, ConcurrentMap<Integer, ExecutorService>> data = new ConcurrentHashMap<>();
 
     private ExecutorService poolRouterExecutor;
@@ -124,17 +133,22 @@ public class DefaultExecutorRepository implements ExecutorRepository, ExtensionA
      *
      * @param url
      * @return
+     *
+     * 根据URL来创建线程池并缓存
      */
     public synchronized ExecutorService createExecutorIfAbsent(URL url) {
         Map<Integer, ExecutorService> executors = data.computeIfAbsent(EXECUTOR_SERVICE_COMPONENT_KEY, k -> new ConcurrentHashMap<>());
         // Consumer's executor is sharing globally, key=Integer.MAX_VALUE. Provider's executor is sharing by protocol.
+        // 消费端的线程池是全局共享的，key是Integer.MAX_VALUE；提供者端的线程池是协议共享的，每个端口对应一个线程池
         Integer portKey = CONSUMER_SIDE.equalsIgnoreCase(url.getParameter(SIDE_KEY)) ? Integer.MAX_VALUE : url.getPort();
         if (url.getParameter(THREAD_NAME_KEY) == null) {
             url = url.putAttribute(THREAD_NAME_KEY, "Dubbo-protocol-"+portKey);
         }
         URL finalUrl = url;
+        // 缓存中获取线程池，不存在就创建线程池
         ExecutorService executor = executors.computeIfAbsent(portKey, k -> createExecutor(finalUrl));
         // If executor has been shut down, create a new one
+        // 如果缓存中的线程池已经关闭了，就移除旧的线程池，创建新的线程池
         if (executor.isShutdown() || executor.isTerminated()) {
             executors.remove(portKey);
             executor = createExecutor(url);
@@ -143,6 +157,11 @@ public class DefaultExecutorRepository implements ExecutorRepository, ExtensionA
         return executor;
     }
 
+    /**
+     * 从缓存中获取线程池
+     * @param url
+     * @return
+     */
     public ExecutorService getExecutor(URL url) {
         Map<Integer, ExecutorService> executors = data.get(EXECUTOR_SERVICE_COMPONENT_KEY);
 
@@ -166,12 +185,19 @@ public class DefaultExecutorRepository implements ExecutorRepository, ExtensionA
             logger.info("Executor for " + url + " is shutdown.");
         }
         if (executor == null) {
+            // 如果缓存中没有线程池，或者线程池已经关闭，则使用共享线程池
             return sharedExecutor;
         } else {
             return executor;
         }
     }
 
+    /**
+     * 更新线程池
+     * @param url
+     * @param executor
+     *
+     */
     @Override
     public void updateThreadpool(URL url, ExecutorService executor) {
         try {
@@ -351,7 +377,13 @@ public class DefaultExecutorRepository implements ExecutorRepository, ExtensionA
         return sharedScheduledExecutor;
     }
 
+    /**
+     * 创建线程池
+     * @param url
+     * @return
+     */
     private ExecutorService createExecutor(URL url) {
+        // 获取扩展实现，并使用具体的实现来创建线程池
         return (ExecutorService) extensionAccessor.getExtensionLoader(ThreadPool.class).getAdaptiveExtension().getExecutor(url);
     }
 

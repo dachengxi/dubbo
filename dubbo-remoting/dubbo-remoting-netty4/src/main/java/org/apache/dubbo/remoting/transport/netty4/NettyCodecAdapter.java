@@ -61,30 +61,46 @@ final public class NettyCodecAdapter {
         return decoder;
     }
 
+    /**
+     * 编码器，继承了Netty的MessageToByteEncoder
+     */
     private class InternalEncoder extends MessageToByteEncoder {
 
         @Override
         protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
+            // 将Netty的ByteBuf统一封装成Dubbo的ChannelBuffer
             ChannelBuffer buffer = new NettyBackedChannelBuffer(out);
+
+            // Netty的通道
             Channel ch = ctx.channel();
+
+            // 将原始的Channel封装成Dubbo的NettyChannel，并将Channel缓存起来
             NettyChannel channel = NettyChannel.getOrAddChannel(ch, url, handler);
+
+            // 使用具体的编码器实现进行编码
             codec.encode(channel, buffer, msg);
         }
     }
 
+    /**
+     * 解码器，继承了Netty的ByteToMessageDecoder
+     */
     private class InternalDecoder extends ByteToMessageDecoder {
 
         @Override
         protected void decode(ChannelHandlerContext ctx, ByteBuf input, List<Object> out) throws Exception {
-
+            // 将Netty的ByteBuf统一封装成Dubbo的ChannelBuffer
             ChannelBuffer message = new NettyBackedChannelBuffer(input);
 
+            // 将原始的Channel封装成Dubbo的NettyChannel，并将Channel缓存起来
             NettyChannel channel = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
 
             // decode object.
             do {
                 int saveReaderIndex = message.readerIndex();
+                // 使用具体的编码器实现进行编码
                 Object msg = codec.decode(channel, message);
+                // 需要等待更多的包
                 if (msg == Codec2.DecodeResult.NEED_MORE_INPUT) {
                     message.readerIndex(saveReaderIndex);
                     break;
@@ -93,6 +109,7 @@ final public class NettyCodecAdapter {
                     if (saveReaderIndex == message.readerIndex()) {
                         throw new IOException("Decode without read data.");
                     }
+                    // 解码后的数据添加到列表中，后续的Handler就可以处理该数据了
                     if (msg != null) {
                         out.add(msg);
                     }

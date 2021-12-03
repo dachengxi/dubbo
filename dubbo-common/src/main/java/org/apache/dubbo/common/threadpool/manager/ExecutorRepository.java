@@ -25,6 +25,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * 线程池仓库，管理线程池用
+ * ExecutorRepository是一个扩展接口，默认实现DefaultExecutorRepository
  */
 @SPI(value = "default", scope = ExtensionScope.APPLICATION)
 public interface ExecutorRepository {
@@ -35,9 +36,16 @@ public interface ExecutorRepository {
      *
      * @param url
      * @return
+     *
+     * 根据URL来创建线程池并缓存
      */
     ExecutorService createExecutorIfAbsent(URL url);
 
+    /**
+     * 获取线程池
+     * @param url
+     * @return
+     */
     ExecutorService getExecutor(URL url);
 
     /**
@@ -45,6 +53,8 @@ public interface ExecutorRepository {
      *
      * @param url
      * @param executor
+     *
+     * 更新线程池
      */
     void updateThreadpool(URL url, ExecutorService executor);
 

@@ -40,6 +40,8 @@ import static org.apache.dubbo.common.constants.CommonConstants.THREAD_NAME_KEY;
 
 /**
  * AbstractClient
+ *
+ * 客户端的抽象
  */
 public abstract class AbstractClient extends AbstractEndpoint implements Client {
 
@@ -47,7 +49,15 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
     private static final Logger logger = LoggerFactory.getLogger(AbstractClient.class);
     private final Lock connectLock = new ReentrantLock();
     private final boolean needReconnect;
+
+    /**
+     * 客户端使用的线程池
+     */
     protected volatile ExecutorService executor;
+
+    /**
+     * 线程池管理器
+     */
     private ExecutorRepository executorRepository;
 
     public AbstractClient(URL url, ChannelHandler handler) throws RemotingException {

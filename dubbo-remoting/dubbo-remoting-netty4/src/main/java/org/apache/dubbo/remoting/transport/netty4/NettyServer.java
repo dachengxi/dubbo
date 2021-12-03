@@ -74,12 +74,22 @@ public class NettyServer extends AbstractServer {
      * Netty的服务启动类
      */
     private ServerBootstrap bootstrap;
+
     /**
      * the boss channel that receive connections and dispatch these to worker channel.
+     *
+     * boss线程池使用的通道，用来接受连接并分配给worker线程池
      */
     private io.netty.channel.Channel channel;
 
+    /**
+     * boss线程池
+     */
     private EventLoopGroup bossGroup;
+
+    /**
+     * worker线程池
+     */
     private EventLoopGroup workerGroup;
     private final int serverShutdownTimeoutMills;
 

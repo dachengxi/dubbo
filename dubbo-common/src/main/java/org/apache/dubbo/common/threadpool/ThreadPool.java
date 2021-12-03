@@ -27,6 +27,10 @@ import static org.apache.dubbo.common.constants.CommonConstants.THREADPOOL_KEY;
 
 /**
  * ThreadPool
+ *
+ * 线程池抽象
+ *
+ * 是一个扩展接口，默认是FixedThreadPool
  */
 //TODO which scope for ThreadPool? APPLICATION or FRAMEWORK
 @SPI(value = "fixed", scope = ExtensionScope.FRAMEWORK)
