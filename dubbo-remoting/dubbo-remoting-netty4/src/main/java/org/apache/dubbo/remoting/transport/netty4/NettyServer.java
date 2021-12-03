@@ -64,10 +64,14 @@ public class NettyServer extends AbstractServer {
     /**
      * the cache for alive worker channel.
      * <ip:port, dubbo channel>
+     * 缓存客户端的通道
      */
     private Map<String, Channel> channels;
+
     /**
      * netty server bootstrap.
+     *
+     * Netty的服务启动类
      */
     private ServerBootstrap bootstrap;
     /**
@@ -82,6 +86,7 @@ public class NettyServer extends AbstractServer {
     public NettyServer(URL url, ChannelHandler handler) throws RemotingException {
         // you can customize name and type of client thread pool by THREAD_NAME_KEY and THREADPOOL_KEY in CommonConstants.
         // the handler will be wrapped: MultiMessageHandler->HeartbeatHandler->handler
+        // 父类中会进行Netty的相关实例化和绑定操作，开启Netty服务
         super(ExecutorUtil.setThreadName(url, SERVER_THREAD_POOL_NAME), ChannelHandlers.wrap(handler, url));
 
         // read config before destroy
@@ -92,26 +97,39 @@ public class NettyServer extends AbstractServer {
      * Init and start netty server
      *
      * @throws Throwable
+     *
+     * 初始化和开始Netty服务
      */
     @Override
     protected void doOpen() throws Throwable {
+        // 创建Netty的服务启动类对象
         bootstrap = new ServerBootstrap();
 
+        // boss线程池
         bossGroup = NettyEventLoopFactory.eventLoopGroup(1, EVENT_LOOP_BOSS_POOL_NAME);
+
+        // worker线程池
         workerGroup = NettyEventLoopFactory.eventLoopGroup(
                 getUrl().getPositiveParameter(IO_THREADS_KEY, Constants.DEFAULT_IO_THREADS),
             EVENT_LOOP_WORKER_POOL_NAME);
 
+        // Netty服务端处理器
         final NettyServerHandler nettyServerHandler = new NettyServerHandler(getUrl(), this);
         channels = nettyServerHandler.getChannels();
 
         boolean keepalive = getUrl().getParameter(KEEP_ALIVE_KEY, Boolean.FALSE);
 
+        // 设置Netty相关参数
         bootstrap.group(bossGroup, workerGroup)
+                // 选择使用EpollServerSocketChannel还是NioServerSocketChannel
                 .channel(NettyEventLoopFactory.serverSocketChannelClass())
+                // 允许重复使用本地地址和端口
                 .option(ChannelOption.SO_REUSEADDR, Boolean.TRUE)
+                // 禁用Nagle算法，适用于小数据即时传输
                 .childOption(ChannelOption.TCP_NODELAY, Boolean.TRUE)
+                // 如果在两小时内没有数据的通信时，TCP会自动发送一个活动探测的数据报文
                 .childOption(ChannelOption.SO_KEEPALIVE, keepalive)
+                // ByteBuf分配器，使用Netty默认的
                 .childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
@@ -123,13 +141,18 @@ public class NettyServer extends AbstractServer {
                             ch.pipeline().addLast("negotiation", new SslServerTlsHandler(getUrl()));
                         }
                         ch.pipeline()
+                                // 解码器
                                 .addLast("decoder", adapter.getDecoder())
+                                // 编码器
                                 .addLast("encoder", adapter.getEncoder())
+                                // 心跳管理
                                 .addLast("server-idle-handler", new IdleStateHandler(0, 0, idleTimeout, MILLISECONDS))
+                                // 业务自己的处理器
                                 .addLast("handler", nettyServerHandler);
                     }
                 });
         // bind
+        // 启动服务
         ChannelFuture channelFuture = bootstrap.bind(getBindAddress());
         channelFuture.syncUninterruptibly();
         channel = channelFuture.channel();

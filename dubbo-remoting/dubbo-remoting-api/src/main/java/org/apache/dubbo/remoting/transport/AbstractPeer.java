@@ -25,11 +25,19 @@ import org.apache.dubbo.remoting.RemotingException;
 
 /**
  * AbstractPeer
+ *
+ * 对于网络通信的两端来说，客户端和服务端是对等端，AbstractPeer是对两端共同功能的抽象
  */
 public abstract class AbstractPeer implements Endpoint, ChannelHandler {
 
+    /**
+     * 通信使用到的通道处理器
+     */
     private final ChannelHandler handler;
 
+    /**
+     * 该端的URL
+     */
     private volatile URL url;
 
     // closing closed means the process is being closed and close is finished
@@ -48,6 +56,11 @@ public abstract class AbstractPeer implements Endpoint, ChannelHandler {
         this.handler = handler;
     }
 
+    /**
+     * 发送消息
+     * @param message
+     * @throws RemotingException
+     */
     @Override
     public void send(Object message) throws RemotingException {
         send(message, url.getParameter(Constants.SENT_KEY, false));

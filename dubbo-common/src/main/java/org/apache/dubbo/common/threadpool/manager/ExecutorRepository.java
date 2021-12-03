@@ -24,7 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
- *
+ * 线程池仓库，管理线程池用
  */
 @SPI(value = "default", scope = ExtensionScope.APPLICATION)
 public interface ExecutorRepository {

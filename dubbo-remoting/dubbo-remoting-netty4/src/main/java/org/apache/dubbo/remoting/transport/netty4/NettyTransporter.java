@@ -25,16 +25,34 @@ import org.apache.dubbo.remoting.Transporter;
 
 /**
  * Default extension of {@link Transporter} using netty4.x.
+ *
+ * 传输层的Netty4的实现
  */
 public class NettyTransporter implements Transporter {
 
     public static final String NAME = "netty";
 
+    /**
+     * 绑定Netty服务端
+     * @param url     server url
+     * @param handler
+     * @return
+     * @throws RemotingException
+     */
     @Override
     public RemotingServer bind(URL url, ChannelHandler handler) throws RemotingException {
+
+        // 创建NettyServer的实例
         return new NettyServer(url, handler);
     }
 
+    /**
+     * Netty连接的客户端
+     * @param url     server url
+     * @param handler
+     * @return
+     * @throws RemotingException
+     */
     @Override
     public Client connect(URL url, ChannelHandler handler) throws RemotingException {
         return new NettyClient(url, handler);

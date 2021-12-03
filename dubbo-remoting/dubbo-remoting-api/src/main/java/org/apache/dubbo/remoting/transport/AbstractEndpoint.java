@@ -31,18 +31,30 @@ import static org.apache.dubbo.rpc.model.ScopeModelUtil.getFrameworkModel;
 
 /**
  * AbstractEndpoint
+ *
+ * 端的抽象实现
  */
 public abstract class AbstractEndpoint extends AbstractPeer implements Resetable {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractEndpoint.class);
 
+    /**
+     * 处理消息用的编解码器
+     */
     private Codec2 codec;
 
+    /**
+     * 连接超时时间
+     */
     private int connectTimeout;
 
     public AbstractEndpoint(URL url, ChannelHandler handler) {
         super(url, handler);
+
+        // 根据URL中的参数来获取通道的编解码器
         this.codec = getChannelCodec(url);
+
+        // 连接超时时间，默认3000
         this.connectTimeout = url.getPositiveParameter(Constants.CONNECT_TIMEOUT_KEY, Constants.DEFAULT_CONNECT_TIMEOUT);
     }
 
@@ -57,6 +69,10 @@ public abstract class AbstractEndpoint extends AbstractPeer implements Resetable
         }
     }
 
+    /**
+     * 重置
+     * @param url
+     */
     @Override
     public void reset(URL url) {
         if (isClosed()) {

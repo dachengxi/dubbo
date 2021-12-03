@@ -39,21 +39,52 @@ import static org.apache.dubbo.remoting.Constants.DEFAULT_ACCEPTS;
 
 /**
  * AbstractServer
+ *
+ * 服务端的抽象
  */
 public abstract class AbstractServer extends AbstractEndpoint implements RemotingServer {
 
     protected static final String SERVER_THREAD_POOL_NAME = "DubboServerHandler";
     private static final Logger logger = LoggerFactory.getLogger(AbstractServer.class);
+
+    /**
+     * 当前服务端关联的线程池，由ExecutorRepository创建和管理
+     */
     private ExecutorService executor;
+
+    /**
+     * 服务端的本地地址
+     */
     private InetSocketAddress localAddress;
+
+    /**
+     * 服务端绑定的地址
+     */
     private InetSocketAddress bindAddress;
+
+    /**
+     * 服务端能接收的最大的连接数，默认0
+     */
     private int accepts;
 
+    /**
+     * 线程池仓库，负责管理线程池
+     */
     private ExecutorRepository executorRepository;
 
+    /**
+     * 这里会进行Netty的相关实例化和绑定操作，开启Netty服务
+     * @param url
+     * @param handler
+     * @throws RemotingException
+     */
     public AbstractServer(URL url, ChannelHandler handler) throws RemotingException {
         super(url, handler);
+
+        // 根据URL获取线程池仓库扩展的实现类
         executorRepository = url.getOrDefaultApplicationModel().getExtensionLoader(ExecutorRepository.class).getDefaultExtension();
+
+        // 服务端的本地地址
         localAddress = getUrl().toInetSocketAddress();
 
         String bindIp = getUrl().getParameter(Constants.BIND_IP_KEY, getUrl().getHost());
@@ -61,9 +92,14 @@ public abstract class AbstractServer extends AbstractEndpoint implements Remotin
         if (url.getParameter(ANYHOST_KEY, false) || NetUtils.isInvalidLocalHost(bindIp)) {
             bindIp = ANYHOST_VALUE;
         }
+
+        // 服务端绑定的地址
         bindAddress = new InetSocketAddress(bindIp, bindPort);
+
+        // 服务端能接收的最大的连接数，默认0
         this.accepts = url.getParameter(ACCEPTS_KEY, DEFAULT_ACCEPTS);
         try {
+            // 会进行Netty的相关实例化和绑定操作，开启Netty服务
             doOpen();
             if (logger.isInfoEnabled()) {
                 logger.info("Start " + getClass().getSimpleName() + " bind " + getBindAddress() + ", export " + getLocalAddress());

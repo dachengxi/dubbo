@@ -28,6 +28,10 @@ import org.apache.dubbo.common.extension.SPI;
  * <a href="http://en.wikipedia.org/wiki/Client%E2%80%93server_model">Client/Server</a>
  *
  * @see org.apache.dubbo.remoting.Transporters
+ *
+ * 传输层，是对底层通信框架的抽象。
+ *
+ * Transporter是一个扩展接口，默认实现Netty
  */
 @SPI(value = "netty", scope = ExtensionScope.FRAMEWORK)
 public interface Transporter {
@@ -40,6 +44,8 @@ public interface Transporter {
      * @return server
      * @throws RemotingException
      * @see org.apache.dubbo.remoting.Transporters#bind(URL, ChannelHandler...)
+     *
+     * 服务端的绑定
      */
     @Adaptive({Constants.SERVER_KEY, Constants.TRANSPORTER_KEY})
     RemotingServer bind(URL url, ChannelHandler handler) throws RemotingException;
@@ -52,6 +58,8 @@ public interface Transporter {
      * @return client
      * @throws RemotingException
      * @see org.apache.dubbo.remoting.Transporters#connect(URL, ChannelHandler...)
+     *
+     * 客户端连接到服务端
      */
     @Adaptive({Constants.CLIENT_KEY, Constants.TRANSPORTER_KEY})
     Client connect(URL url, ChannelHandler handler) throws RemotingException;

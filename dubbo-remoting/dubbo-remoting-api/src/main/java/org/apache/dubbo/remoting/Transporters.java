@@ -23,6 +23,8 @@ import org.apache.dubbo.remoting.transport.ChannelHandlerDispatcher;
 
 /**
  * Transporter facade. (API, Static, ThreadSafe)
+ *
+ * 传输层的门面类，传输层的统一入口
  */
 public class Transporters {
 
@@ -35,10 +37,24 @@ public class Transporters {
     private Transporters() {
     }
 
+    /**
+     * 服务端的绑定
+     * @param url
+     * @param handler
+     * @return
+     * @throws RemotingException
+     */
     public static RemotingServer bind(String url, ChannelHandler... handler) throws RemotingException {
         return bind(URL.valueOf(url), handler);
     }
 
+    /**
+     * 服务端的绑定
+     * @param url
+     * @param handlers
+     * @return
+     * @throws RemotingException
+     */
     public static RemotingServer bind(URL url, ChannelHandler... handlers) throws RemotingException {
         if (url == null) {
             throw new IllegalArgumentException("url == null");
@@ -50,15 +66,32 @@ public class Transporters {
         if (handlers.length == 1) {
             handler = handlers[0];
         } else {
+            // 有多个通道处理器的时候，封装成通道处理器分发器来统一管理
             handler = new ChannelHandlerDispatcher(handlers);
         }
+
+        // 获取传输层扩展的实现，并进行绑定操作
         return getTransporter(url).bind(url, handler);
     }
 
+    /**
+     * 客户端连接到服务端
+     * @param url
+     * @param handler
+     * @return
+     * @throws RemotingException
+     */
     public static Client connect(String url, ChannelHandler... handler) throws RemotingException {
         return connect(URL.valueOf(url), handler);
     }
 
+    /**
+     * 客户端连接到服务端
+     * @param url
+     * @param handlers
+     * @return
+     * @throws RemotingException
+     */
     public static Client connect(URL url, ChannelHandler... handlers) throws RemotingException {
         if (url == null) {
             throw new IllegalArgumentException("url == null");
@@ -69,11 +102,18 @@ public class Transporters {
         } else if (handlers.length == 1) {
             handler = handlers[0];
         } else {
+            // 有多个通道处理器的时候，封装成通道处理器分发器来统一管理
             handler = new ChannelHandlerDispatcher(handlers);
         }
+        // 获取传输层扩展的实现，并进行连接操作
         return getTransporter(url).connect(url, handler);
     }
 
+    /**
+     * 获取传输层扩展的实现
+     * @param url
+     * @return
+     */
     public static Transporter getTransporter(URL url) {
         return url.getOrDefaultFrameworkModel().getExtensionLoader(Transporter.class).getAdaptiveExtension();
     }
