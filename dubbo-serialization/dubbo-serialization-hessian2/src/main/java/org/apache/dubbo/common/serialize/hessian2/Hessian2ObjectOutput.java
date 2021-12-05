@@ -26,6 +26,8 @@ import java.io.OutputStream;
 
 /**
  * Hessian2 object output implementation
+ *
+ * 对象输出的实现：Hessian2的实现方式
  */
 public class Hessian2ObjectOutput implements ObjectOutput, Cleanable {
 

@@ -33,6 +33,8 @@ import static org.apache.dubbo.common.serialize.Constants.HESSIAN2_SERIALIZATION
  * <pre>
  *     e.g. &lt;dubbo:protocol serialization="hessian2" /&gt;
  * </pre>
+ *
+ * Hessian2的方式实现的序列化方式
  */
 public class Hessian2Serialization implements Serialization {
 

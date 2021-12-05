@@ -27,6 +27,8 @@ import java.lang.reflect.Type;
 
 /**
  * Hessian2 object input implementation
+ *
+ * 对象输入的实现：Hessian2的实现方式
  */
 public class Hessian2ObjectInput implements ObjectInput, Cleanable {
     private final Hessian2Input mH2i;

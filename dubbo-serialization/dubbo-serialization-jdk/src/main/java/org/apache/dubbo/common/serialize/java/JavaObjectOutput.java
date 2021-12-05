@@ -24,6 +24,8 @@ import java.io.OutputStream;
 
 /**
  * Java object output implementation
+ *
+ * 对象输出的实现：Java对象
  */
 public class JavaObjectOutput extends NativeJavaObjectOutput {
     public JavaObjectOutput(OutputStream os) throws IOException {

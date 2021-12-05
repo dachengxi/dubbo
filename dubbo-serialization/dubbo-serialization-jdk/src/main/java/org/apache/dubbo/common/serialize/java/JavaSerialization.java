@@ -36,6 +36,8 @@ import static org.apache.dubbo.common.serialize.Constants.JAVA_SERIALIZATION_ID;
  * <pre>
  *     e.g. &lt;dubbo:protocol serialization="java" /&gt;
  * </pre>
+ *
+ * Java的方式实现序列化
  */
 public class JavaSerialization implements Serialization {
     private static final Logger logger = LoggerFactory.getLogger(JavaSerialization.class);

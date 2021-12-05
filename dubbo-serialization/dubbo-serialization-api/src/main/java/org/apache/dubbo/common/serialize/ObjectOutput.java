@@ -21,6 +21,8 @@ import java.util.Map;
 
 /**
  * Object output interface.
+ *
+ * 对象输出的抽象
  */
 public interface ObjectOutput extends DataOutput {
 

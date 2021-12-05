@@ -22,6 +22,8 @@ import java.util.Map;
 
 /**
  * Object input interface.
+ *
+ * 对象输入的抽象
  */
 public interface ObjectInput extends DataInput {
 

@@ -32,6 +32,10 @@ import java.io.OutputStream;
  * <pre>
  *     e.g. &lt;dubbo:protocol serialization="xxx" /&gt;
  * </pre>
+ *
+ * Dubbo的序列化的抽象
+ *
+ * Serialization是一个扩展接口，默认实现是Hessian2Serialization
  */
 @SPI(value = "hessian2", scope = ExtensionScope.FRAMEWORK)
 public interface Serialization {
@@ -59,6 +63,8 @@ public interface Serialization {
      * @param output the underlying output stream
      * @return serializer
      * @throws IOException
+     *
+     * 序列化
      */
     @Adaptive
     ObjectOutput serialize(URL url, OutputStream output) throws IOException;
@@ -70,6 +76,8 @@ public interface Serialization {
      * @param input the underlying input stream
      * @return deserializer
      * @throws IOException
+     *
+     * 反序列化
      */
     @Adaptive
     ObjectInput deserialize(URL url, InputStream input) throws IOException;
