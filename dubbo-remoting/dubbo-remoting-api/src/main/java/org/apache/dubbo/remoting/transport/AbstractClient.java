@@ -48,6 +48,10 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
     protected static final String CLIENT_THREAD_POOL_NAME = "DubboClientHandler";
     private static final Logger logger = LoggerFactory.getLogger(AbstractClient.class);
     private final Lock connectLock = new ReentrantLock();
+
+    /**
+     * 需要重连的标识
+     */
     private final boolean needReconnect;
 
     /**
@@ -62,13 +66,17 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
 
     public AbstractClient(URL url, ChannelHandler handler) throws RemotingException {
         super(url, handler);
+
+        // 获取线程池管理的扩展实现
         executorRepository = url.getOrDefaultApplicationModel().getExtensionLoader(ExecutorRepository.class).getDefaultExtension();
         // set default needReconnect true when channel is not connected
         needReconnect = url.getParameter(Constants.SEND_RECONNECT_KEY, true);
 
+        // 根据URL参数来创建或者获取一个线程池
         initExecutor(url);
 
         try {
+            // Netty初始化启动类
             doOpen();
         } catch (Throwable t) {
             close();
@@ -79,6 +87,7 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
 
         try {
             // connect.
+            // Netty连接操作
             connect();
             if (logger.isInfoEnabled()) {
                 logger.info("Start " + getClass().getSimpleName() + " " + NetUtils.getLocalAddress() + " connect to the server " + getRemoteAddress());
@@ -195,6 +204,10 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
         channel.send(message, sent);
     }
 
+    /**
+     * 连接到服务端
+     * @throws RemotingException
+     */
     protected void connect() throws RemotingException {
         connectLock.lock();
 
@@ -209,6 +222,7 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
                 return;
             }
 
+            // Netty的连接操作
             doConnect();
 
             if (!isConnected()) {

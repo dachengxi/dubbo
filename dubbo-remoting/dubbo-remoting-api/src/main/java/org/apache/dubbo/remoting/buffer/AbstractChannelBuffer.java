@@ -22,21 +22,44 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
+/**
+ * 通道缓冲区的抽象实现
+ */
 public abstract class AbstractChannelBuffer implements ChannelBuffer {
 
+    /**
+     * 缓冲区的读指针
+     */
     private int readerIndex;
 
+    /**
+     * 缓冲区的写指针
+     */
     private int writerIndex;
 
+    /**
+     * 缓冲区中被标记的读指针
+     */
     private int markedReaderIndex;
 
+    /**
+     * 缓冲区中被标记的写指针
+     */
     private int markedWriterIndex;
 
+    /**
+     * 返回读指针
+     * @return
+     */
     @Override
     public int readerIndex() {
         return readerIndex;
     }
 
+    /**
+     * 设置读指针
+     * @param readerIndex
+     */
     @Override
     public void readerIndex(int readerIndex) {
         if (readerIndex < 0 || readerIndex > writerIndex) {
@@ -45,11 +68,19 @@ public abstract class AbstractChannelBuffer implements ChannelBuffer {
         this.readerIndex = readerIndex;
     }
 
+    /**
+     * 返回写指针
+     * @return
+     */
     @Override
     public int writerIndex() {
         return writerIndex;
     }
 
+    /**
+     * 设置写指针
+     * @param writerIndex
+     */
     @Override
     public void writerIndex(int writerIndex) {
         if (writerIndex < readerIndex || writerIndex > capacity()) {
@@ -58,6 +89,11 @@ public abstract class AbstractChannelBuffer implements ChannelBuffer {
         this.writerIndex = writerIndex;
     }
 
+    /**
+     * 设置读写指针
+     * @param readerIndex
+     * @param writerIndex
+     */
     @Override
     public void setIndex(int readerIndex, int writerIndex) {
         if (readerIndex < 0 || readerIndex > writerIndex || writerIndex > capacity()) {
@@ -67,51 +103,85 @@ public abstract class AbstractChannelBuffer implements ChannelBuffer {
         this.writerIndex = writerIndex;
     }
 
+    /**
+     * 清空缓冲区的数据，将读写指针都设置为0
+     */
     @Override
     public void clear() {
         readerIndex = writerIndex = 0;
     }
 
+    /**
+     * 判断缓冲区是否可读
+     * @return
+     */
     @Override
     public boolean readable() {
         return readableBytes() > 0;
     }
 
+    /**
+     * 判断缓冲区是否可写
+     * @return
+     */
     @Override
     public boolean writable() {
         return writableBytes() > 0;
     }
 
+    /**
+     * 返回可读的字节数
+     * @return
+     */
     @Override
     public int readableBytes() {
         return writerIndex - readerIndex;
     }
 
+    /**
+     * 返回可写的字节数
+     * @return
+     */
     @Override
     public int writableBytes() {
         return capacity() - writerIndex;
     }
 
+    /**
+     * 设置读指针标记
+     */
     @Override
     public void markReaderIndex() {
         markedReaderIndex = readerIndex;
     }
 
+    /**
+     * 重设读指针为标记的读指针
+     */
     @Override
     public void resetReaderIndex() {
         readerIndex(markedReaderIndex);
     }
 
+    /**
+     * 设置写指针标记
+     */
     @Override
     public void markWriterIndex() {
         markedWriterIndex = writerIndex;
     }
 
+    /**
+     * 重设写指针为标记的写指针
+     */
     @Override
     public void resetWriterIndex() {
         writerIndex = markedWriterIndex;
     }
 
+    /**
+     * 丢弃已读的的字节数据
+     */
     @Override
     public void discardReadBytes() {
         if (readerIndex == 0) {

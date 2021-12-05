@@ -40,6 +40,9 @@ import java.util.Set;
 
 import static org.apache.dubbo.common.BaseServiceMetadata.keyWithoutGroup;
 
+/**
+ * 编解码器的辅助类
+ */
 public class CodecSupport {
     private static final Logger logger = LoggerFactory.getLogger(CodecSupport.class);
 
@@ -47,6 +50,10 @@ public class CodecSupport {
      * 缓存序列化方式
      */
     private static Map<Byte, Serialization> ID_SERIALIZATION_MAP = new HashMap<Byte, Serialization>();
+
+    /**
+     * 缓存序列化方式的名字
+     */
     private static Map<Byte, String> ID_SERIALIZATIONNAME_MAP = new HashMap<Byte, String>();
     private static Map<String, Byte> SERIALIZATIONNAME_ID_MAP = new HashMap<String, Byte>();
     // Cache null object serialize results, for heartbeat request/response serialize use.
@@ -55,7 +62,10 @@ public class CodecSupport {
     private static final ThreadLocal<byte[]> TL_BUFFER = ThreadLocal.withInitial(() -> new byte[1024]);
 
     static {
-        ExtensionLoader<Serialization> extensionLoader = FrameworkModel.defaultModel().getExtensionLoader(Serialization.class);
+        // 获取Serialization的扩展加载器
+        ExtensionLoader<Serialization> extensionLoader = FrameworkModel.defaultModel().getExtensionLoader(Serialization.class);、
+
+        // 获取Serialization的所有的扩展实现，下面循环将所有扩展实现的相关信息放到缓存中
         Set<String> supportedExtensions = extensionLoader.getSupportedExtensions();
         for (String name : supportedExtensions) {
             Serialization serialization = extensionLoader.getExtension(name);
@@ -76,14 +86,29 @@ public class CodecSupport {
     private CodecSupport() {
     }
 
+    /**
+     * 根据id获取序列化的实现
+     * @param id
+     * @return
+     */
     public static Serialization getSerializationById(Byte id) {
         return ID_SERIALIZATION_MAP.get(id);
     }
 
+    /**
+     * 根据名字获取序列化实现的id
+     * @param name
+     * @return
+     */
     public static Byte getIDByName(String name) {
         return SERIALIZATIONNAME_ID_MAP.get(name);
     }
 
+    /**
+     * 根据URL中的参数获取序列化的实现
+     * @param url
+     * @return
+     */
     public static Serialization getSerialization(URL url) {
         return url.getOrDefaultFrameworkModel().getExtensionLoader(Serialization.class).getExtension(
                 url.getParameter(Constants.SERIALIZATION_KEY, Constants.DEFAULT_REMOTING_SERIALIZATION));
@@ -116,7 +141,7 @@ public class CodecSupport {
         // 获取序列化方式
         Serialization s = getSerialization(url, proto);
 
-        // 反序列化
+        // 使用具体的序列化实现类进行反序列化
         return s.deserialize(url, is);
     }
 
@@ -126,6 +151,8 @@ public class CodecSupport {
      *
      * @param s Serialization Instances
      * @return serialize result of null object
+     *
+     * 获取null的序列化结果
      */
     public static byte[] getNullBytesOf(Serialization s) {
         return ID_NULLBYTES_MAP.computeIfAbsent(s.getContentTypeId(), k -> {
@@ -151,6 +178,8 @@ public class CodecSupport {
      * @param is
      * @return
      * @throws IOException
+     *
+     * 获取流中的数据
      */
     public static byte[] getPayload(InputStream is) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

@@ -23,12 +23,31 @@ import org.apache.dubbo.remoting.buffer.ChannelBuffer;
 
 import java.io.IOException;
 
+/**
+ * 编解码器的抽象
+ *
+ * Codec2是一个扩展接口
+ */
 @SPI(scope = ExtensionScope.FRAMEWORK)
 public interface Codec2 {
 
+    /**
+     * 编码操作
+     * @param channel
+     * @param buffer
+     * @param message
+     * @throws IOException
+     */
     @Adaptive({Constants.CODEC_KEY})
     void encode(Channel channel, ChannelBuffer buffer, Object message) throws IOException;
 
+    /**
+     * 解码操作
+     * @param channel
+     * @param buffer
+     * @return
+     * @throws IOException
+     */
     @Adaptive({Constants.CODEC_KEY})
     Object decode(Channel channel, ChannelBuffer buffer) throws IOException;
 

@@ -51,6 +51,8 @@ import static org.apache.dubbo.remoting.api.NettyEventLoopFactory.socketChannelC
 
 /**
  * NettyClient.
+ *
+ * 基于Netty的客户端
  */
 public class NettyClient extends AbstractClient {
 
@@ -69,18 +71,25 @@ public class NettyClient extends AbstractClient {
         eventLoopGroup(Constants.DEFAULT_IO_THREADS, "NettyClientWorker"),
         eventLoopGroup -> eventLoopGroup.shutdownGracefully());
 
+    /**
+     * Netty客户端的启动类
+     */
     private Bootstrap bootstrap;
 
     /**
      * current channel. Each successful invocation of {@link NettyClient#doConnect()} will
      * replace this with new channel and close old channel.
      * <b>volatile, please copy reference to use.</b>
+     *
+     * 客户端连接的通道
      */
     private volatile Channel channel;
 
     /**
      * The constructor of NettyClient.
      * It wil init and start netty.
+     *
+     * NettyClient的构造方法，会进行Netty的初始化和启动操作
      */
     public NettyClient(final URL url, final ChannelHandler handler) throws RemotingException {
         // you can customize name and type of client thread pool by THREAD_NAME_KEY and THREADPOOL_KEY in CommonConstants.
@@ -92,9 +101,12 @@ public class NettyClient extends AbstractClient {
      * Init bootstrap
      *
      * @throws Throwable
+     *
+     * Netty客户端初始化启动类
      */
     @Override
     protected void doOpen() throws Throwable {
+        // Netty客户端处理器
         final NettyClientHandler nettyClientHandler = new NettyClientHandler(getUrl(), this);
         bootstrap = new Bootstrap();
         bootstrap.group(EVENT_LOOP_GROUP.get())
@@ -115,11 +127,16 @@ public class NettyClient extends AbstractClient {
                     ch.pipeline().addLast("negotiation", new SslClientTlsHandler(getUrl()));
                 }
 
+                // 编解码适配器
                 NettyCodecAdapter adapter = new NettyCodecAdapter(getCodec(), getUrl(), NettyClient.this);
                 ch.pipeline()//.addLast("logging",new LoggingHandler(LogLevel.INFO))//for debug
+                        // 解码器
                         .addLast("decoder", adapter.getDecoder())
+                        // 编码器
                         .addLast("encoder", adapter.getEncoder())
+                        // 心跳管理
                         .addLast("client-idle-handler", new IdleStateHandler(heartbeatInterval, 0, 0, MILLISECONDS))
+                        // 客户端的处理器
                         .addLast("handler", nettyClientHandler);
 
                 String socksProxyHost = ConfigurationUtils.getProperty(getUrl().getOrDefaultApplicationModel(), SOCKS_PROXY_HOST);
@@ -140,18 +157,25 @@ public class NettyClient extends AbstractClient {
         return false;
     }
 
+    /**
+     * 连接到服务端的操作
+     * @throws Throwable
+     */
     @Override
     protected void doConnect() throws Throwable {
         long start = System.currentTimeMillis();
+        // 连接
         ChannelFuture future = bootstrap.connect(getConnectAddress());
         try {
             boolean ret = future.awaitUninterruptibly(getConnectTimeout(), MILLISECONDS);
 
+            // 连接成功
             if (ret && future.isSuccess()) {
                 Channel newChannel = future.channel();
                 try {
                     // Close old channel
                     // copy reference
+                    // 关闭旧的通道
                     Channel oldChannel = NettyClient.this.channel;
                     if (oldChannel != null) {
                         try {

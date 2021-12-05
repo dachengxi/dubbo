@@ -200,11 +200,14 @@ import java.nio.ByteBuffer;
  * ChannelBufferOutputStream}.
  *
  *
+ * Dubbo对通道缓冲区的抽象
  */
 public interface ChannelBuffer extends Comparable<ChannelBuffer> {
 
     /**
      * Returns the number of bytes (octets) this buffer can contain.
+     *
+     * 缓冲区的容量
      */
     int capacity();
 
@@ -216,6 +219,8 @@ public interface ChannelBuffer extends Comparable<ChannelBuffer> {
      * Please note that the behavior of this method is different from that of
      * NIO buffer, which sets the {@code limit} to the {@code capacity} of the
      * buffer.
+     *
+     * 清空缓冲区，读指针和写指针都设为0
      */
     void clear();
 
@@ -225,6 +230,8 @@ public interface ChannelBuffer extends Comparable<ChannelBuffer> {
      * This method is identical to {@code buf.copy(buf.readerIndex(),
      * buf.readableBytes())}. This method does not modify {@code readerIndex} or
      * {@code writerIndex} of this buffer.
+     *
+     * 复制缓冲区的可读的数据，修改复制后的缓冲区的数据以及修改原来的缓冲区的数据不会相互影响
      */
     ChannelBuffer copy();
 
@@ -233,6 +240,8 @@ public interface ChannelBuffer extends Comparable<ChannelBuffer> {
      * returned buffer or this buffer does not affect each other at all. This
      * method does not modify {@code readerIndex} or {@code writerIndex} of this
      * buffer.
+     *
+     * 从缓冲区中的指定的位置复制一个新的缓冲区，修改复制后的缓冲区的数据以及修改原来的缓冲区的数据不会相互影响
      */
     ChannelBuffer copy(int index, int length);
 
@@ -243,6 +252,8 @@ public interface ChannelBuffer extends Comparable<ChannelBuffer> {
      * {@code 0} and {@code oldWriterIndex - oldReaderIndex} respectively.
      * <p/>
      * Please refer to the class documentation for more detailed explanation.
+     *
+     * 丢弃已读的的字节数据
      */
     void discardReadBytes();
 
@@ -416,6 +427,8 @@ public interface ChannelBuffer extends Comparable<ChannelBuffer> {
      * the current {@code readerIndex} to the marked {@code readerIndex} by
      * calling {@link #resetReaderIndex()}. The initial value of the marked
      * {@code readerIndex} is {@code 0}.
+     *
+     * 设置读指针标记
      */
     void markReaderIndex();
 
@@ -424,18 +437,24 @@ public interface ChannelBuffer extends Comparable<ChannelBuffer> {
      * the current {@code writerIndex} to the marked {@code writerIndex} by
      * calling {@link #resetWriterIndex()}. The initial value of the marked
      * {@code writerIndex} is {@code 0}.
+     *
+     * 设置写指针标记
      */
     void markWriterIndex();
 
     /**
      * Returns {@code true} if and only if {@code (this.writerIndex -
      * this.readerIndex)} is greater than {@code 0}.
+     *
+     * 判断缓冲区是否可读
      */
     boolean readable();
 
     /**
      * Returns the number of readable bytes which is equal to {@code
      * (this.writerIndex - this.readerIndex)}.
+     *
+     * 返回可读的字节数
      */
     int readableBytes();
 
@@ -551,6 +570,8 @@ public interface ChannelBuffer extends Comparable<ChannelBuffer> {
      * @throws IndexOutOfBoundsException if the current {@code writerIndex} is
      *                                   less than the marked {@code
      *                                   readerIndex}
+     *
+     * 重设读指针为标记的读指针
      */
     void resetReaderIndex();
 
@@ -559,11 +580,15 @@ public interface ChannelBuffer extends Comparable<ChannelBuffer> {
      * the current {@code writerIndex} to the marked {@code writerIndex} by
      * calling {@link #resetWriterIndex()}. The initial value of the marked
      * {@code writerIndex} is {@code 0}.
+     *
+     * 重设写指针为标记的写指针
      */
     void resetWriterIndex();
 
     /**
      * Returns the {@code readerIndex} of this buffer.
+     *
+     * 返回读指针
      */
     int readerIndex();
 
@@ -573,6 +598,8 @@ public interface ChannelBuffer extends Comparable<ChannelBuffer> {
      * @throws IndexOutOfBoundsException if the specified {@code readerIndex} is
      *                                   less than {@code 0} or greater than
      *                                   {@code this.writerIndex}
+     *
+     * 设置读指针
      */
     void readerIndex(int readerIndex);
 
@@ -762,6 +789,8 @@ public interface ChannelBuffer extends Comparable<ChannelBuffer> {
      *                                   {@code readerIndex} or if the specified
      *                                   {@code writerIndex} is greater than
      *                                   {@code this.capacity}
+     *
+     * 设置读写指针
      */
     void setIndex(int readerIndex, int writerIndex);
 
@@ -795,12 +824,16 @@ public interface ChannelBuffer extends Comparable<ChannelBuffer> {
     /**
      * Returns {@code true} if and only if {@code (this.capacity -
      * this.writerIndex)} is greater than {@code 0}.
+     *
+     * 判断缓冲区是否可写
      */
     boolean writable();
 
     /**
      * Returns the number of writable bytes which is equal to {@code
      * (this.capacity - this.writerIndex)}.
+     *
+     * 返回可写的字节数
      */
     int writableBytes();
 
@@ -913,6 +946,8 @@ public interface ChannelBuffer extends Comparable<ChannelBuffer> {
 
     /**
      * Returns the {@code writerIndex} of this buffer.
+     *
+     * 返回写指针
      */
     int writerIndex();
 
@@ -922,6 +957,8 @@ public interface ChannelBuffer extends Comparable<ChannelBuffer> {
      * @throws IndexOutOfBoundsException if the specified {@code writerIndex} is
      *                                   less than {@code this.readerIndex} or
      *                                   greater than {@code this.capacity}
+     *
+     * 设置写指针
      */
     void writerIndex(int writerIndex);
 

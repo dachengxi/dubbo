@@ -36,6 +36,8 @@ import static org.apache.dubbo.common.constants.CommonConstants.SIDE_KEY;
 
 /**
  * AbstractCodec
+ *
+ * 编解码器的抽象实现类
  */
 public abstract class AbstractCodec implements Codec2, ScopeModelAware {
 
@@ -51,6 +53,12 @@ public abstract class AbstractCodec implements Codec2, ScopeModelAware {
         this.frameworkModel = frameworkModel;
     }
 
+    /**
+     * 检查数据长度是否超过指定的大小
+     * @param channel
+     * @param size
+     * @throws IOException
+     */
     protected static void checkPayload(Channel channel, long size) throws IOException {
         int payload = getPayload(channel);
         boolean overPayload = isOverPayload(payload, size);
@@ -62,6 +70,11 @@ public abstract class AbstractCodec implements Codec2, ScopeModelAware {
         }
     }
 
+    /**
+     * 获取配置的传输的数据大小，默认是8M
+     * @param channel
+     * @return
+     */
     protected static int getPayload(Channel channel) {
         int payload = Constants.DEFAULT_PAYLOAD;
         if (channel != null && channel.getUrl() != null) {

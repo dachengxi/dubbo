@@ -22,6 +22,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
+/**
+ * 动态ChannelBuffer，当ChannelBuffer不够用的时候，会动态扩展容量，创建一个新的ChannelBuffer，
+ * 并将旧的Buffer中的数据拷贝到新的Buffer中
+ */
 public class DynamicChannelBuffer extends AbstractChannelBuffer {
 
     private final ChannelBufferFactory factory;

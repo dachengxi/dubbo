@@ -19,6 +19,9 @@ package org.apache.dubbo.remoting.buffer;
 
 import java.nio.ByteBuffer;
 
+/**
+ * 获取ChannelBuffer的工具类
+ */
 public final class ChannelBuffers {
 
     public static final ChannelBuffer EMPTY_BUFFER = new HeapChannelBuffer(0);
@@ -28,19 +31,40 @@ public final class ChannelBuffers {
     private ChannelBuffers() {
     }
 
+    /**
+     * 获取一个动态的ChannelBuffer
+     * @return
+     */
+
     public static ChannelBuffer dynamicBuffer() {
         return dynamicBuffer(DEFAULT_CAPACITY);
     }
 
+    /**
+     * 获取一个动态的ChannelBuffer
+     * @param capacity
+     * @return
+     */
     public static ChannelBuffer dynamicBuffer(int capacity) {
         return new DynamicChannelBuffer(capacity);
     }
 
+    /**
+     * 获取一个动态的ChannelBuffer
+     * @param capacity
+     * @param factory
+     * @return
+     */
     public static ChannelBuffer dynamicBuffer(int capacity,
                                               ChannelBufferFactory factory) {
         return new DynamicChannelBuffer(capacity, factory);
     }
 
+    /**
+     * 获取一个基于堆内存的ChannelBuffer
+     * @param capacity
+     * @return
+     */
     public static ChannelBuffer buffer(int capacity) {
         if (capacity < 0) {
             throw new IllegalArgumentException("capacity can not be negative");
@@ -51,6 +75,13 @@ public final class ChannelBuffers {
         return new HeapChannelBuffer(capacity);
     }
 
+    /**
+     * 包装成一个基于堆内存的ChannelBuffer
+     * @param array
+     * @param offset
+     * @param length
+     * @return
+     */
     public static ChannelBuffer wrappedBuffer(byte[] array, int offset, int length) {
         if (array == null) {
             throw new NullPointerException("array == null");
@@ -60,6 +91,11 @@ public final class ChannelBuffers {
         return wrappedBuffer(dest);
     }
 
+    /**
+     * 包装成一个基于堆内存的ChannelBuffer
+     * @param array
+     * @return
+     */
     public static ChannelBuffer wrappedBuffer(byte[] array) {
         if (array == null) {
             throw new NullPointerException("array == null");
@@ -70,6 +106,11 @@ public final class ChannelBuffers {
         return new HeapChannelBuffer(array);
     }
 
+    /**
+     * 将ByteBuffer包装成一个ChannelBuffer
+     * @param buffer
+     * @return
+     */
     public static ChannelBuffer wrappedBuffer(ByteBuffer buffer) {
         if (!buffer.hasRemaining()) {
             return EMPTY_BUFFER;
@@ -81,6 +122,11 @@ public final class ChannelBuffers {
         }
     }
 
+    /**
+     * 获取一个基于直接内存的ChannelBuffer
+     * @param capacity
+     * @return
+     */
     public static ChannelBuffer directBuffer(int capacity) {
         if (capacity == 0) {
             return EMPTY_BUFFER;
