@@ -28,6 +28,12 @@ import static org.apache.dubbo.rpc.Constants.SERIALIZATION_ID_KEY;
 
 public class DubboCodecSupport {
 
+    /**
+     * 获取请求序列化实现
+     * @param url
+     * @param invocation
+     * @return
+     */
     public static Serialization getRequestSerialization(URL url, Invocation invocation) {
         Object serializationTypeObj = invocation.get(SERIALIZATION_ID_KEY);
         if (serializationTypeObj != null) {
@@ -37,6 +43,12 @@ public class DubboCodecSupport {
                 url.getParameter(org.apache.dubbo.remoting.Constants.SERIALIZATION_KEY, Constants.DEFAULT_REMOTING_SERIALIZATION));
     }
 
+    /**
+     * 获取响应的序列化实现
+     * @param url
+     * @param appResponse
+     * @return
+     */
     public static Serialization getResponseSerialization(URL url, AppResponse appResponse) {
         Object invocationObj = appResponse.getAttribute(INVOCATION_KEY);
         if (invocationObj != null) {

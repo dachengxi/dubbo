@@ -32,8 +32,14 @@ import java.io.IOException;
 import static org.apache.dubbo.rpc.Constants.INPUT_KEY;
 import static org.apache.dubbo.rpc.Constants.OUTPUT_KEY;
 
+/**
+ * Dubbo协议的编解码器，解决解码的半包问题
+ */
 public final class DubboCountCodec implements Codec2 {
 
+    /**
+     * 对消息体进行处理的编解码器
+     */
     private DubboCodec codec;
     private FrameworkModel frameworkModel;
 
@@ -42,21 +48,40 @@ public final class DubboCountCodec implements Codec2 {
         codec = new DubboCodec(frameworkModel);
     }
 
+    /**
+     * 编码
+     * @param channel
+     * @param buffer
+     * @param msg
+     * @throws IOException
+     */
     @Override
     public void encode(Channel channel, ChannelBuffer buffer, Object msg) throws IOException {
         codec.encode(channel, buffer, msg);
     }
 
+    /**
+     * 解码
+     * @param channel
+     * @param buffer
+     * @return
+     * @throws IOException
+     */
     @Override
     public Object decode(Channel channel, ChannelBuffer buffer) throws IOException {
         int save = buffer.readerIndex();
+        // 可能会解析到多个消息
         MultiMessage result = MultiMessage.create();
         do {
+            // 进行解码
             Object obj = codec.decode(channel, buffer);
+
+            // 解码的数据返回了需要更多数据，说明通道中数据不全，还需要继续等待通道中的数据从网络上传来
             if (Codec2.DecodeResult.NEED_MORE_INPUT == obj) {
                 buffer.readerIndex(save);
                 break;
             } else {
+                // 解码到了消息体数据，添加到结果中
                 result.addMessage(obj);
                 logMessageLength(obj, buffer.readerIndex() - save);
                 save = buffer.readerIndex();

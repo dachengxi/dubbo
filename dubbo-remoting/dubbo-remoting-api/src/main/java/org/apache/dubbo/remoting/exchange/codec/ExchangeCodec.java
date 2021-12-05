@@ -271,10 +271,13 @@ public class ExchangeCodec extends TelnetCodec {
             }
             try {
                 Object data;
+                // 事件请求
                 if (req.isEvent()) {
                     byte[] eventPayload = CodecSupport.getPayload(is);
+                    // 心跳
                     if (CodecSupport.isHeartBeat(eventPayload, proto)) {
                         // heart beat response data is always null;
+                        // 心跳事件的body是null
                         data = null;
                     } else {
                         // 反序列化并解码事件数据

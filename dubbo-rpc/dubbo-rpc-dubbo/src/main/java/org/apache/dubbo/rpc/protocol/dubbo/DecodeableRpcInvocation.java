@@ -86,10 +86,15 @@ public class DecodeableRpcInvocation extends RpcInvocation implements Codec, Dec
         callbackServiceCodec = new CallbackServiceCodec(frameworkModel);
     }
 
+    /**
+     * 解码请求消息体
+     * @throws Exception
+     */
     @Override
     public void decode() throws Exception {
         if (!hasDecoded && channel != null && inputStream != null) {
             try {
+                // 解码
                 decode(channel, inputStream);
             } catch (Throwable e) {
                 if (log.isWarnEnabled()) {
@@ -112,23 +117,37 @@ public class DecodeableRpcInvocation extends RpcInvocation implements Codec, Dec
 
     }
 
+    /**
+     * 解码请求消息体
+     * @param channel channel.
+     * @param input   input stream.
+     * @return
+     * @throws IOException
+     */
     @Override
     public Object decode(Channel channel, InputStream input) throws IOException {
+        // 反序列化消息体
         ObjectInput in = CodecSupport.getSerialization(channel.getUrl(), serializationType)
             .deserialize(channel.getUrl(), input);
         this.put(SERIALIZATION_ID_KEY, serializationType);
 
+        // Dubbo版本
         String dubboVersion = in.readUTF();
         request.setVersion(dubboVersion);
         setAttachment(DUBBO_VERSION_KEY, dubboVersion);
 
+        // 服务名字
         String path = in.readUTF();
         setAttachment(PATH_KEY, path);
+
+        // 服务版本
         String version = in.readUTF();
         setAttachment(VERSION_KEY, version);
 
+        // 方法名字
         setMethodName(in.readUTF());
 
+        // 方法参数类型
         String desc = in.readUTF();
         setParameterTypesDesc(desc);
 
@@ -137,7 +156,11 @@ public class DecodeableRpcInvocation extends RpcInvocation implements Codec, Dec
             if (Boolean.parseBoolean(System.getProperty(SERIALIZATION_SECURITY_CHECK_KEY, "true"))) {
                 CodecSupport.checkSerialization(frameworkModel.getServiceRepository(), path, version, serializationType);
             }
+
+            // 存储方法的参数
             Object[] args = DubboCodec.EMPTY_OBJECT_ARRAY;
+
+            // 存储方法参数的类型
             Class<?>[] pts = DubboCodec.EMPTY_CLASS_ARRAY;
             if (desc.length() > 0) {
 //                if (RpcUtils.isGenericCall(path, getMethodName()) || RpcUtils.isEcho(path, getMethodName())) {
@@ -221,6 +244,7 @@ public class DecodeableRpcInvocation extends RpcInvocation implements Codec, Dec
             }
             setParameterTypes(pts);
 
+            // attachments
             Map<String, Object> map = in.readAttachments();
             if (CollectionUtils.isNotEmptyMap(map)) {
                 Map<String, Object> attachment = getObjectAttachments();

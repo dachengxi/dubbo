@@ -63,6 +63,11 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
         handler.received(channel, message);
     }
 
+    /**
+     * 解码消息
+     * 不是在IO线程中直接解码的消息，则会封装成Decodeable类型的的消息，在业务线程中进行解码
+     * @param message
+     */
     private void decode(Object message) {
         if (message instanceof Decodeable) {
             try {

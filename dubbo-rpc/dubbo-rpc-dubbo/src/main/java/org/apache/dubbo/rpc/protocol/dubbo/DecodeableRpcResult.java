@@ -75,6 +75,13 @@ public class DecodeableRpcResult extends AppResponse implements Codec, Decodeabl
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * 解码响应消息体
+     * @param channel channel.
+     * @param input   input stream.
+     * @return
+     * @throws IOException
+     */
     @Override
     public Object decode(Channel channel, InputStream input) throws IOException {
         if (log.isDebugEnabled()) {
@@ -86,17 +93,22 @@ public class DecodeableRpcResult extends AppResponse implements Codec, Decodeabl
         if (invocation != null && invocation.getServiceModel() != null) {
             Thread.currentThread().setContextClassLoader(invocation.getServiceModel().getClassLoader());
         }
+        // 反序列化
         ObjectInput in = CodecSupport.getSerialization(channel.getUrl(), serializationType)
                 .deserialize(channel.getUrl(), input);
 
+        // 返回值类型，一个字节
         byte flag = in.readByte();
         switch (flag) {
             case DubboCodec.RESPONSE_NULL_VALUE:
+                // 响应返回空值
                 break;
             case DubboCodec.RESPONSE_VALUE:
+                // 正常响应
                 handleValue(in);
                 break;
             case DubboCodec.RESPONSE_WITH_EXCEPTION:
+                // 异常响应
                 handleException(in);
                 break;
             case DubboCodec.RESPONSE_NULL_VALUE_WITH_ATTACHMENTS:
@@ -119,6 +131,10 @@ public class DecodeableRpcResult extends AppResponse implements Codec, Decodeabl
         return this;
     }
 
+    /**
+     * 解码响应消息体
+     * @throws Exception
+     */
     @Override
     public void decode() throws Exception {
         if (!hasDecoded && channel != null && inputStream != null) {
@@ -135,6 +151,7 @@ public class DecodeableRpcResult extends AppResponse implements Codec, Decodeabl
                     }
                 }
 
+                // 解码
                 decode(channel, inputStream);
             } catch (Throwable e) {
                 if (log.isWarnEnabled()) {
@@ -148,6 +165,11 @@ public class DecodeableRpcResult extends AppResponse implements Codec, Decodeabl
         }
     }
 
+    /**
+     * 处理正常响应消息体
+     * @param in
+     * @throws IOException
+     */
     private void handleValue(ObjectInput in) throws IOException {
         try {
             Type[] returnTypes;
@@ -165,6 +187,7 @@ public class DecodeableRpcResult extends AppResponse implements Codec, Decodeabl
             } else {
                 value = in.readObject((Class<?>) returnTypes[0], returnTypes[1]);
             }
+            // 解码后的结果
             setValue(value);
         } catch (ClassNotFoundException e) {
             rethrow(e);
