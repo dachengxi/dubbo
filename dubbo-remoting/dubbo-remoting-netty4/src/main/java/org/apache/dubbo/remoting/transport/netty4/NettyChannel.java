@@ -38,16 +38,24 @@ import static org.apache.dubbo.common.constants.CommonConstants.TIMEOUT_KEY;
 
 /**
  * NettyChannel maintains the cache of channel.
+ *
+ * Netty的通道
  */
 final class NettyChannel extends AbstractChannel {
 
     private static final Logger logger = LoggerFactory.getLogger(NettyChannel.class);
+
     /**
      * the cache for netty channel and dubbo channel
+     *
+     * 缓存了Netty的Channel和Dubbo的Channel的关系
      */
     private static final ConcurrentMap<Channel, NettyChannel> CHANNEL_MAP = new ConcurrentHashMap<Channel, NettyChannel>();
+
     /**
      * netty channel
+     *
+     * Netty的Channel
      */
     private final Channel channel;
 
@@ -79,6 +87,9 @@ final class NettyChannel extends AbstractChannel {
      * @param url
      * @param handler dubbo handler that contain netty's handler
      * @return
+     *
+     * 根据Netty的Channel获取对应的Dubbo的Channel，从缓存中获取，如果缓存中不存在，会创建一个
+     * Dubbo的Channel，并将对应关系放到缓存中
      */
     static NettyChannel getOrAddChannel(Channel ch, URL url, ChannelHandler handler) {
         if (ch == null) {
@@ -150,6 +161,8 @@ final class NettyChannel extends AbstractChannel {
      * @param message message that need send.
      * @param sent    whether to ack async-sent
      * @throws RemotingException throw RemotingException if wait until timeout or any exception thrown by method body that surrounded by try-catch.
+     *
+     * 使用Netty的Channel发送消息
      */
     @Override
     public void send(Object message, boolean sent) throws RemotingException {
@@ -159,6 +172,7 @@ final class NettyChannel extends AbstractChannel {
         boolean success = true;
         int timeout = 0;
         try {
+            // 写数据出去
             ChannelFuture future = channel.writeAndFlush(message);
             if (sent) {
                 // wait timeout ms
