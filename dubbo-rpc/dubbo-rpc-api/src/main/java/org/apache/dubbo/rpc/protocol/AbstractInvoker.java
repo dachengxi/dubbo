@@ -55,6 +55,8 @@ import static org.apache.dubbo.rpc.Constants.SERIALIZATION_ID_KEY;
 
 /**
  * This Invoker works on Consumer side.
+ *
+ * RPC服务调用者的抽象实现
  */
 public abstract class AbstractInvoker<T> implements Invoker<T> {
 
@@ -62,26 +64,36 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
 
     /**
      * Service interface type
+     *
+     * 调用的服务接口的类型
      */
     private final Class<T> type;
 
     /**
      * {@link Node} url
+     *
+     * URL
      */
     private final URL url;
 
     /**
      * {@link Invoker} default attachment
+     *
+     * 服务调用者的附件
      */
     private final Map<String, Object> attachment;
 
     /**
      * {@link Node} available
+     *
+     * 调用者是否可用
      */
     private volatile boolean available = true;
 
     /**
      * {@link Node} destroy
+     *
+     * 调用者是否被销毁
      */
     private boolean destroyed = false;
 
@@ -159,6 +171,12 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
         return getInterface() + " -> " + (getUrl() == null ? "" : getUrl().getAddress());
     }
 
+    /**
+     * 执行服务调用
+     * @param inv
+     * @return
+     * @throws RpcException
+     */
     @Override
     public Result invoke(Invocation inv) throws RpcException {
         // if invoker is destroyed due to address refresh from registry, let's allow the current invoke to proceed

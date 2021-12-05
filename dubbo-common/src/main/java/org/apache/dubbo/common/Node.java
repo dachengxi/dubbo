@@ -18,6 +18,8 @@ package org.apache.dubbo.common;
 
 /**
  * Node. (API/SPI, Prototype, ThreadSafe)
+ *
+ * 服务节点抽象，不管是一个服务提供者还是一个消费者，都可以认为是一个节点
  */
 public interface Node {
 
@@ -25,6 +27,8 @@ public interface Node {
      * get url.
      *
      * @return url.
+     *
+     * 获取URL
      */
     URL getUrl();
 
@@ -32,11 +36,15 @@ public interface Node {
      * is available.
      *
      * @return available.
+     *
+     * 节点是否可用
      */
     boolean isAvailable();
 
     /**
      * destroy.
+     *
+     * 销毁
      */
     void destroy();
 

@@ -26,6 +26,10 @@ import java.util.List;
 
 /**
  * Protocol. (API/SPI, Singleton, ThreadSafe)
+ *
+ * 远程调用层抽象，对远程调用实现抽象和封装
+ *
+ * Protocol是扩展接口，默认实现是DubboProtocol
  */
 @SPI(value = "dubbo", scope = ExtensionScope.FRAMEWORK)
 public interface Protocol {
@@ -34,6 +38,8 @@ public interface Protocol {
      * Get default port when user doesn't config the port.
      *
      * @return default port
+     *
+     * 获取远程调用默认端口
      */
     int getDefaultPort();
 
@@ -49,6 +55,8 @@ public interface Protocol {
      * @param invoker Service invoker
      * @return exporter reference for exported service, useful for unexport the service later
      * @throws RpcException thrown when error occurs during export the service, for example: port is occupied
+     *
+     * 导出服务，服务提供者暴露服务以供消费者进行远程调用
      */
     @Adaptive
     <T> Exporter<T> export(Invoker<T> invoker) throws RpcException;
@@ -67,6 +75,8 @@ public interface Protocol {
      * @param url  URL address for the remote service
      * @return invoker service's local proxy
      * @throws RpcException when there's any error while connecting to the service provider
+     *
+     * 引用服务，服务消费者调用服务提供者导出的服务
      */
     @Adaptive
     <T> Invoker<T> refer(Class<T> type, URL url) throws RpcException;

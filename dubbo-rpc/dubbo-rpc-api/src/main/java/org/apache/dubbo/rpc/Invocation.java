@@ -30,6 +30,8 @@ import java.util.stream.Stream;
  * @serial Don't change the class name and package name.
  * @see org.apache.dubbo.rpc.Invoker#invoke(Invocation)
  * @see org.apache.dubbo.rpc.RpcInvocation
+ *
+ * 对一次服务的调用的抽象
  */
 public interface Invocation {
 

@@ -44,6 +44,8 @@ import static org.apache.dubbo.common.constants.CommonConstants.SHUTDOWN_WAIT_KE
 
 /**
  * abstract ProtocolSupport.
+ *
+ * 远程调用层的抽象实现
  */
 public abstract class AbstractProtocol implements Protocol, ScopeModelAware {
 
