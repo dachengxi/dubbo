@@ -32,9 +32,15 @@ import java.lang.reflect.Method;
 
 /**
  * InvokerHandler
+ *
+ * 动态代理实现
  */
 public class InvokerInvocationHandler implements InvocationHandler {
     private static final Logger logger = LoggerFactory.getLogger(InvokerInvocationHandler.class);
+
+    /**
+     * 调用者Invoker
+     */
     private final Invoker<?> invoker;
     private ServiceModel serviceModel;
     private URL url;
@@ -58,12 +64,24 @@ public class InvokerInvocationHandler implements InvocationHandler {
         this.serviceModel = this.url.getServiceModel();
     }
 
+    /**
+     * 动态代理调用
+     * @param proxy
+     * @param method
+     * @param args
+     * @return
+     * @throws Throwable
+     */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         if (method.getDeclaringClass() == Object.class) {
             return method.invoke(invoker, args);
         }
+
+        // 调用的方法名
         String methodName = method.getName();
+
+        // 参数
         Class<?>[] parameterTypes = method.getParameterTypes();
         if (parameterTypes.length == 0) {
             if ("toString".equals(methodName)) {
@@ -77,6 +95,8 @@ public class InvokerInvocationHandler implements InvocationHandler {
         } else if (parameterTypes.length == 1 && "equals".equals(methodName)) {
             return invoker.equals(args[0]);
         }
+
+        // 将调用封装成一个RpcInvocation对象
         RpcInvocation rpcInvocation = new RpcInvocation(serviceModel, method, invoker.getInterface().getName(), protocolServiceKey, args);
         String serviceKey = url.getServiceKey();
         rpcInvocation.setTargetServiceUniqueName(serviceKey);
@@ -89,6 +109,7 @@ public class InvokerInvocationHandler implements InvocationHandler {
             rpcInvocation.put(Constants.METHOD_MODEL, ((ConsumerModel) serviceModel).getMethodModel(method));
         }
 
+        // 交给实际的调用者Invoker进行远程调用
         return invoker.invoke(rpcInvocation).recreate();
     }
 }

@@ -55,33 +55,58 @@ public class RpcInvocation implements Invocation, Serializable {
 
     private static final long serialVersionUID = -4355285085441097045L;
 
+    /**
+     * 调用的目标服务的名字
+     */
     private String targetServiceUniqueName;
     private String protocolServiceKey;
 
     private ServiceModel serviceModel;
 
+    /**
+     * 调用的方法名
+     */
     private String methodName;
 
+    /**
+     * 调用的服务名
+     */
     private String serviceName;
 
+    /**
+     * 参数类型
+     */
     private transient Class<?>[] parameterTypes;
     private String parameterTypesDesc;
     private String[] compatibleParamSignatures;
 
+    /**
+     * 参数
+     */
     private Object[] arguments;
 
     /**
      * Passed to the remote server during RPC call
+     *
+     * 传给远程服务的附件
      */
     private Map<String, Object> attachments;
 
     /**
      * Only used on the caller side, will not appear on the wire.
+     *
+     * 调用方本地使用的属性
      */
     private transient Map<Object, Object> attributes = new HashMap<Object, Object>();
 
+    /**
+     * 调用者
+     */
     private transient Invoker<?> invoker;
 
+    /**
+     * 返回类型
+     */
     private transient Class<?> returnType;
 
     private transient Type[] returnTypes;

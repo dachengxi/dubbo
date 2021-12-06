@@ -36,17 +36,34 @@ import static org.apache.dubbo.rpc.Constants.INTERFACES;
 
 /**
  * AbstractProxyFactory
+ *
+ * 代理工厂的抽象实现
  */
 public abstract class AbstractProxyFactory implements ProxyFactory {
     private static final Class<?>[] INTERNAL_INTERFACES = new Class<?>[]{
         EchoService.class, Destroyable.class
     };
 
+    /**
+     * 获取代理
+     * @param invoker
+     * @param <T>
+     * @return
+     * @throws RpcException
+     */
     @Override
     public <T> T getProxy(Invoker<T> invoker) throws RpcException {
         return getProxy(invoker, false);
     }
 
+    /**
+     * 获取代理
+     * @param invoker
+     * @param generic
+     * @param <T>
+     * @return
+     * @throws RpcException
+     */
     @Override
     public <T> T getProxy(Invoker<T> invoker, boolean generic) throws RpcException {
         // when compiling with native image, ensure that the order of the interfaces remains unchanged
@@ -103,6 +120,13 @@ public abstract class AbstractProxyFactory implements ProxyFactory {
         return INTERNAL_INTERFACES.clone();
     }
 
+    /**
+     * 获取代理
+     * @param invoker
+     * @param types
+     * @param <T>
+     * @return
+     */
     public abstract <T> T getProxy(Invoker<T> invoker, Class<?>[] types);
 
 }

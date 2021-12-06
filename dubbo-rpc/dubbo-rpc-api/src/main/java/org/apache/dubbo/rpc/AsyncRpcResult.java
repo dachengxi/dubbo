@@ -45,6 +45,8 @@ import static org.apache.dubbo.common.utils.ReflectUtils.defaultReturn;
  * AsyncRpcResult does not contain any concrete value (except the underlying value bring by CompletableFuture), consider it as a status transfer node.
  * {@link #getValue()} and {@link #getException()} are all inherited from {@link Result} interface, implementing them are mainly
  * for compatibility consideration. Because many legacy {@link Filter} implementation are most possibly to call getValue directly.
+ *
+ * 异步调用的结果
  */
 public class AsyncRpcResult implements Result {
     private static final Logger logger = LoggerFactory.getLogger(AsyncRpcResult.class);
@@ -57,8 +59,14 @@ public class AsyncRpcResult implements Result {
     private RpcContextAttachment storedServerContext;
     private Executor executor;
 
+    /**
+     * 表示一次调用
+     */
     private Invocation invocation;
 
+    /**
+     * 持有响应结果的Future
+     */
     private CompletableFuture<AppResponse> responseFuture;
 
     public AsyncRpcResult(CompletableFuture<AppResponse> future, Invocation invocation) {
@@ -72,6 +80,8 @@ public class AsyncRpcResult implements Result {
      * Notice the return type of {@link #getValue} is the actual type of the RPC method, not {@link AppResponse}
      *
      * @return
+     *
+     * 获取返回的结果
      */
     @Override
     public Object getValue() {
@@ -140,8 +150,13 @@ public class AsyncRpcResult implements Result {
         this.responseFuture = responseFuture;
     }
 
+    /**
+     * 获取AppResponse
+     * @return
+     */
     public Result getAppResponse() {
         try {
+            // 已经返回了结果
             if (responseFuture.isDone()) {
                 return responseFuture.get();
             }

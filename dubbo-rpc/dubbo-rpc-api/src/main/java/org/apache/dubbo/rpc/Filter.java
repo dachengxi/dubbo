@@ -64,6 +64,8 @@ import org.apache.dubbo.common.extension.SPI;
  * @see org.apache.dubbo.rpc.filter.EchoFilter
  * @see org.apache.dubbo.rpc.filter.TokenFilter
  * @see org.apache.dubbo.rpc.filter.TpsLimitFilter
+ *
+ * 过滤器的抽象，是个一扩展接口
  */
 @SPI(scope = ExtensionScope.MODULE)
 public interface Filter extends BaseFilter {

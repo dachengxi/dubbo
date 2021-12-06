@@ -25,6 +25,8 @@ import static org.apache.dubbo.rpc.Constants.PROXY_KEY;
 
 /**
  * ProxyFactory. (API/SPI, Singleton, ThreadSafe)
+ *
+ * 代理工厂抽象，是一个扩展接口，默认实现JavassistProxyFactory
  */
 @SPI(value = "javassist", scope = FRAMEWORK)
 public interface ProxyFactory {
@@ -34,6 +36,8 @@ public interface ProxyFactory {
      *
      * @param invoker
      * @return proxy
+     *
+     * 创建代理
      */
     @Adaptive({PROXY_KEY})
     <T> T getProxy(Invoker<T> invoker) throws RpcException;
@@ -43,6 +47,8 @@ public interface ProxyFactory {
      *
      * @param invoker
      * @return proxy
+     *
+     * 创建代理
      */
     @Adaptive({PROXY_KEY})
     <T> T getProxy(Invoker<T> invoker, boolean generic) throws RpcException;
@@ -55,6 +61,8 @@ public interface ProxyFactory {
      * @param type
      * @param url
      * @return invoker
+     *
+     * 获取Invoker
      */
     @Adaptive({PROXY_KEY})
     <T> Invoker<T> getInvoker(T proxy, Class<T> type, URL url) throws RpcException;

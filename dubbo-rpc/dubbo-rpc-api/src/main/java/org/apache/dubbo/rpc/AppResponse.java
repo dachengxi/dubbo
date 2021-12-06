@@ -47,13 +47,21 @@ import static org.apache.dubbo.rpc.Constants.INVOCATION_KEY;
  * In theory, AppResponse doesn't have to implement the {@link Result} interface, this is done mainly for compatibility purpose.
  *
  * @serial Do not change the class name and properties.
+ *
+ * 表示业务返回的结果
  */
 public class AppResponse implements Result {
 
     private static final long serialVersionUID = -6925924956850004727L;
 
+    /**
+     * 返回的结果
+     */
     private Object result;
 
+    /**
+     * 返回的异常信息
+     */
     private Throwable exception;
 
     private Map<String, Object> attachments = new HashMap<>();
