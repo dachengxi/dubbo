@@ -188,26 +188,39 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
         RpcInvocation invocation = (RpcInvocation) inv;
 
         // prepare rpc invocation
+        // 执行远程调用前的准备工作
         prepareInvocation(invocation);
 
         // do invoke rpc invocation and return async result
+        // 执行远程调用，并返回异步结果
         AsyncRpcResult asyncResult = doInvokeAndReturn(invocation);
 
         // wait rpc result if sync
+        // 如果是同步的模式，需要等待调用结果
         waitForResultIfSync(asyncResult, invocation);
 
         return asyncResult;
     }
 
+    /**
+     * 执行远程调用前的准备工作
+     * @param inv
+     */
     private void prepareInvocation(RpcInvocation inv) {
+
+        // 设置Invoker
         inv.setInvoker(this);
 
+        // 添加调用的附件
         addInvocationAttachments(inv);
 
+        // 设置调用模式
         inv.setInvokeMode(RpcUtils.getInvokeMode(url, inv));
 
+        // 如果是异步的调用，将调用ID添加到附件中
         RpcUtils.attachInvocationIdIfAsync(getUrl(), inv);
 
+        // 设置序列化方式的ID
         Byte serializationId = CodecSupport.getIDByName(getUrl().getParameter(SERIALIZATION_KEY, DEFAULT_REMOTING_SERIALIZATION));
         if (serializationId != null) {
             inv.put(SERIALIZATION_ID_KEY, serializationId);
@@ -227,9 +240,16 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
         }
     }
 
+    /**
+     * 执行远程调用，并返回异步结果
+     * @param invocation
+     * @return
+     */
     private AsyncRpcResult doInvokeAndReturn(RpcInvocation invocation) {
+        // 异步调用结果
         AsyncRpcResult asyncResult;
         try {
+            // 执行调用
             asyncResult = (AsyncRpcResult) doInvoke(invocation);
         } catch (InvocationTargetException e) {
             Throwable te = e.getTargetException();
@@ -259,7 +279,13 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
         return asyncResult;
     }
 
+    /**
+     * 如果是同步模式，需要等待返回结果
+     * @param asyncResult
+     * @param invocation
+     */
     private void waitForResultIfSync(AsyncRpcResult asyncResult, RpcInvocation invocation) {
+        // 部署同步模式的，直接返回
         if (InvokeMode.SYNC != invocation.getInvokeMode()) {
             return;
         }
@@ -269,8 +295,10 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
              * must call {@link java.util.concurrent.CompletableFuture#get(long, TimeUnit)} because
              * {@link java.util.concurrent.CompletableFuture#get()} was proved to have serious performance drop.
              */
+            // 获取超时时间
             Object timeout = invocation.get(TIMEOUT_KEY);
             if (timeout instanceof Integer) {
+                // 阻塞获取调用的结果
                 asyncResult.get((Integer) timeout, TimeUnit.MILLISECONDS);
             } else {
                 asyncResult.get(Integer.MAX_VALUE, TimeUnit.MILLISECONDS);
@@ -313,6 +341,8 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
 
     /**
      * Specific implementation of the {@link #invoke(Invocation)} method
+     *
+     * 执行远程调用
      */
     protected abstract Result doInvoke(Invocation invocation) throws Throwable;
 }

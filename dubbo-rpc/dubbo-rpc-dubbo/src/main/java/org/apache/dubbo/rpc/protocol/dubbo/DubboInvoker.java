@@ -84,13 +84,26 @@ public class DubboInvoker<T> extends AbstractInvoker<T> {
         this.serverShutdownTimeout = ConfigurationUtils.getServerShutdownTimeout(getUrl().getScopeModel());
     }
 
+    /**
+     * 执行远程调用
+     * @param invocation
+     * @return
+     * @throws Throwable
+     */
     @Override
     protected Result doInvoke(final Invocation invocation) throws Throwable {
         RpcInvocation inv = (RpcInvocation) invocation;
+
+        // 远程调用的方法名
         final String methodName = RpcUtils.getMethodName(invocation);
+
+        // 服务名
         inv.setAttachment(PATH_KEY, getUrl().getPath());
+
+        // 版本
         inv.setAttachment(VERSION_KEY, version);
 
+        // 信息交换客户端
         ExchangeClient currentClient;
         if (clients.length == 1) {
             currentClient = clients[0];
@@ -98,19 +111,29 @@ public class DubboInvoker<T> extends AbstractInvoker<T> {
             currentClient = clients[index.getAndIncrement() % clients.length];
         }
         try {
+            // 是否是单向消息
             boolean isOneway = RpcUtils.isOneway(getUrl(), invocation);
+
+            // 超时时间
             int timeout = calculateTimeout(invocation, methodName);
             invocation.put(TIMEOUT_KEY, timeout);
+
+            // 单向请求
             if (isOneway) {
                 boolean isSent = getUrl().getMethodParameter(methodName, Constants.SENT_KEY, false);
                 currentClient.send(inv, isSent);
+                // 返回默认的异步结果，结果是null
                 return AsyncRpcResult.newDefaultAsyncResult(invocation);
             } else {
                 ExecutorService executor = getCallbackExecutor(getUrl(), inv);
+
+                // 使用信息交换客户端发送请求，并得到Future
                 CompletableFuture<AppResponse> appResponseFuture =
                         currentClient.request(inv, timeout, executor).thenApply(obj -> (AppResponse) obj);
                 // save for 2.6.x compatibility, for example, TraceFilter in Zipkin uses com.alibaba.xxx.FutureAdapter
                 FutureContext.getContext().setCompatibleFuture(appResponseFuture);
+
+                // 封装成异步调用结果返回
                 AsyncRpcResult result = new AsyncRpcResult(appResponseFuture, inv);
                 result.setExecutor(executor);
                 return result;
