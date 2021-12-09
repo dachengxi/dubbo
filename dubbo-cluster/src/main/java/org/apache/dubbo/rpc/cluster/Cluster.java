@@ -30,6 +30,9 @@ import org.apache.dubbo.rpc.model.ScopeModelUtil;
  * <a href="http://en.wikipedia.org/wiki/Computer_cluster">Cluster</a>
  * <a href="http://en.wikipedia.org/wiki/Fault-tolerant_system">Fault-Tolerant</a>
  *
+ * 集群容错接口，是一个扩展接口，默认是实现FailoverCluster。
+ *
+ * 某些服务提供者发生故障的时候，消费者可以使用容错机制来选择怎么继续调用服务提供者。
  */
 @SPI(Cluster.DEFAULT)
 public interface Cluster {
@@ -43,6 +46,8 @@ public interface Cluster {
      * @param directory
      * @return cluster invoker
      * @throws RpcException
+     *
+     * 合并目录中的Invoker集合到一个虚拟的Invoker
      */
     @Adaptive
     <T> Invoker<T> join(Directory<T> directory, boolean buildFilterChain) throws RpcException;

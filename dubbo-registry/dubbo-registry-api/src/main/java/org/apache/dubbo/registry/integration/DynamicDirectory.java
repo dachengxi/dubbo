@@ -52,38 +52,60 @@ import static org.apache.dubbo.remoting.Constants.CHECK_KEY;
 
 /**
  * RegistryDirectory
+ *
+ * 动态目录的抽象，也就是目录中维护的Invoker集合会动态变化
  */
 public abstract class DynamicDirectory<T> extends AbstractDirectory<T> implements NotifyListener {
 
     private static final Logger logger = LoggerFactory.getLogger(DynamicDirectory.class);
 
+    /**
+     * 集群策略
+     */
     protected final Cluster cluster;
 
+    /**
+     * 路由工厂
+     */
     protected final RouterFactory routerFactory;
 
     /**
      * Initialization at construction time, assertion not null
+     *
+     * 服务对应的key，格式：interface:[group]:[version]
      */
     protected final String serviceKey;
 
     /**
      * Initialization at construction time, assertion not null
+     *
+     * 服务接口类型
      */
     protected final Class<T> serviceType;
 
     /**
      * Initialization at construction time, assertion not null, and always assign non null value
+     *
+     * 只保留Consumer属性的URL，由queryMap集合重新生成的URL
      */
     protected final URL directoryUrl;
+
+    /**
+     * 是否引用多个服务组
+     */
     protected final boolean multiGroup;
 
     /**
      * Initialization at the time of injection, the assertion is not null
+     *
+     * 目录使用的具体的协议
      */
     protected Protocol protocol;
 
     /**
      * Initialization at the time of injection, the assertion is not null
+     *
+     * 目录使用的注册中心
      */
     protected Registry registry;
     protected volatile boolean forbidden = false;
@@ -102,6 +124,8 @@ public abstract class DynamicDirectory<T> extends AbstractDirectory<T> implement
      * Priority: override>-D>consumer>provider
      * Rule one: for a certain provider <ip:port,timeout=100>
      * Rule two: for all providers <* ,timeout=5000>
+     *
+     * 动态更新的配置信息
      */
     protected volatile List<Configurator> configurators;
 
@@ -153,6 +177,10 @@ public abstract class DynamicDirectory<T> extends AbstractDirectory<T> implement
         return shouldRegister;
     }
 
+    /**
+     * Consumer进行订阅的时候会调用该方法
+     * @param url
+     */
     public void subscribe(URL url) {
         setSubscribeUrl(url);
         registry.subscribe(url, this);

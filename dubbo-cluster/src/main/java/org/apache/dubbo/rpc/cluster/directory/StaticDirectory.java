@@ -30,6 +30,8 @@ import java.util.List;
 
 /**
  * StaticDirectory
+ *
+ * 静态目录，该目录中维护的Invoker集合是不变的
  */
 public class StaticDirectory<T> extends AbstractDirectory<T> {
     private static final Logger logger = LoggerFactory.getLogger(StaticDirectory.class);
@@ -101,10 +103,18 @@ public class StaticDirectory<T> extends AbstractDirectory<T> {
         }
     }
 
+    /**
+     * 根据Invocation来过滤合适的Invoker
+     * @param invokers
+     * @param invocation
+     * @return
+     * @throws RpcException
+     */
     @Override
     protected List<Invoker<T>> doList(BitList<Invoker<T>> invokers, Invocation invocation) throws RpcException {
         if (routerChain != null) {
             try {
+                // 通过路由链过滤合适的Invoker集合
                 List<Invoker<T>> finalInvokers = routerChain.route(getConsumerUrl(), invokers, invocation);
                 return finalInvokers == null ? BitList.emptyList() : finalInvokers;
             } catch (Throwable t) {

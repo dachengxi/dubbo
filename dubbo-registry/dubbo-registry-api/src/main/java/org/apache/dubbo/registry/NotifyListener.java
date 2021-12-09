@@ -39,6 +39,8 @@ public interface NotifyListener {
      * 5. The order of notifications to be guaranteed by the notifications(That is, the implementation of the registry). Such as: single thread push, queue serialization, and version comparison.<br>
      *
      * @param urls The list of registered information , is always not empty. The meaning is the same as the return value of {@link org.apache.dubbo.registry.RegistryService#lookup(URL)}.
+     *
+     * 服务有变化的时候会触发该方法
      */
     void notify(List<URL> urls);
 

@@ -62,20 +62,36 @@ import static org.apache.dubbo.rpc.cluster.Constants.REFER_KEY;
 
 /**
  * Abstract implementation of Directory: Invoker list returned from this Directory's list method have been filtered by Routers
+ * 目录接口的抽象实现
  */
 public abstract class AbstractDirectory<T> implements Directory<T> {
 
     // logger
     private static final Logger logger = LoggerFactory.getLogger(AbstractDirectory.class);
 
+    /**
+     * 服务的URL
+     */
     private final URL url;
 
+    /**
+     * 是否被销毁
+     */
     private volatile boolean destroyed = false;
 
+    /**
+     * 消费者的URL
+     */
     protected volatile URL consumerUrl;
 
+    /**
+     * 路由链，记录当前目录使用的路由集合
+     */
     protected RouterChain<T> routerChain;
 
+    /**
+     * Consumer的URL中refer参数解析后的KV集合
+     */
     protected final Map<String, String> queryMap;
 
     /**
@@ -85,6 +101,8 @@ public abstract class AbstractDirectory<T> implements Directory<T> {
 
     /**
      * All invokers from registry
+     *
+     * 当前目录维护的Invoker集合
      */
     private volatile BitList<Invoker<T>> invokers = BitList.emptyList();
 
@@ -422,6 +440,13 @@ public abstract class AbstractDirectory<T> implements Directory<T> {
         }
     }
 
+    /**
+     * 根据Invocation来过滤合适的Invoker
+     * @param invokers
+     * @param invocation
+     * @return
+     * @throws RpcException
+     */
     protected abstract List<Invoker<T>> doList(BitList<Invoker<T>> invokers, Invocation invocation) throws RpcException;
 
 }

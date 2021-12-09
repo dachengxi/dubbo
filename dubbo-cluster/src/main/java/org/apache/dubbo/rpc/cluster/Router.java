@@ -31,6 +31,8 @@ import java.util.List;
  *
  * @see org.apache.dubbo.rpc.cluster.Cluster#join(Directory, boolean)
  * @see org.apache.dubbo.rpc.cluster.Directory#list(Invocation)
+ *
+ * 路由接口，按照规则路由到合适的服务提供者
  */
 public interface Router extends Comparable<Router> {
 
@@ -67,6 +69,8 @@ public interface Router extends Comparable<Router> {
      * @param needToPrintMessage whether to print router state. Such as `use router branch a`.
      * @return state with route result
      * @throws RpcException
+     *
+     * 路由，按照用户的规则找出符合条件的服务提供者
      */
     default <T> RouterResult<Invoker<T>> route(List<Invoker<T>> invokers, URL url, Invocation invocation,
                                                      boolean needToPrintMessage) throws RpcException {
@@ -79,6 +83,8 @@ public interface Router extends Comparable<Router> {
      *
      * @param invokers invoker list
      * @param <T>      invoker's type
+     *
+     * Invoker列表有变化的时候通知路由
      */
     default <T> void notify(List<Invoker<T>> invokers) {
 
@@ -89,6 +95,8 @@ public interface Router extends Comparable<Router> {
      * rule change.
      *
      * @return true if the router need to execute every time.
+     *
+     * 为true表示每次有RPC请求到来的时候路由就被执行，为false表示只有地址或者规则变化的时候执行路由
      */
     boolean isRuntime();
 

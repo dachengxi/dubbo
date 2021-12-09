@@ -31,6 +31,8 @@ import java.util.List;
  * <a href="http://en.wikipedia.org/wiki/Directory_service">Directory Service</a>
  *
  * @see org.apache.dubbo.rpc.cluster.Cluster#join(Directory)
+ *
+ * 目录接口，表示多个Invoker的集合。
  */
 public interface Directory<T> extends Node {
 
@@ -38,6 +40,8 @@ public interface Directory<T> extends Node {
      * get service type.
      *
      * @return service type.
+     *
+     * 接口类型
      */
     Class<T> getInterface();
 
@@ -46,17 +50,29 @@ public interface Directory<T> extends Node {
      * filtered by invocation
      *
      * @return invokers
+     *
+     * 根据Invocation来过滤合适的Invoker
      */
     List<Invoker<T>> list(Invocation invocation) throws RpcException;
 
     /**
      * list invokers
      * include all invokers from registry
+     *
+     * 获取当前目录管理的所有的Invoker结合
      */
     List<Invoker<T>> getAllInvokers();
 
+    /**
+     * 消费者的URL
+     * @return
+     */
     URL getConsumerUrl();
 
+    /**
+     * 目录是否被销毁
+     * @return
+     */
     boolean isDestroyed();
 
     default boolean isEmpty() {
@@ -69,6 +85,10 @@ public interface Directory<T> extends Node {
 
     void discordAddresses();
 
+    /**
+     * 获取路由链
+     * @return
+     */
     RouterChain<T> getRouterChain();
 
     /**
@@ -76,6 +96,8 @@ public interface Directory<T> extends Node {
      * will be recovered by address refresh notification or reconnect success notification
      *
      * @param invoker invoker to invalidate
+     *
+     * 作废Invoker
      */
     void addInvalidateInvoker(Invoker<T> invoker);
 
@@ -85,6 +107,8 @@ public interface Directory<T> extends Node {
      * using in service offline notification
      *
      * @param invoker invoker to invalidate
+     *
+     *  禁用Invoker
      */
     void addDisabledInvoker(Invoker<T> invoker);
 
@@ -92,6 +116,8 @@ public interface Directory<T> extends Node {
      * recover a disabled invoker
      *
      * @param invoker invoker to invalidate
+     *
+     * 恢复一个禁用的Invoker
      */
     void recoverDisabledInvoker(Invoker<T> invoker);
 
