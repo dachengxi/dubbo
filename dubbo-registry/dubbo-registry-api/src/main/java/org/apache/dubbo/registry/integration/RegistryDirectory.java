@@ -294,6 +294,8 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
             }
 
             List<Invoker<T>> newInvokers = Collections.unmodifiableList(new ArrayList<>(newUrlInvokerMap.values()));
+
+            // 将每个group中的多个Invoker合并成一个Invoker
             this.setInvokers(multiGroup ? new BitList<>(toMergeInvokerList(newInvokers)) : new BitList<>(newInvokers));
             // pre-route and build cache
             routerChain.setInvokers(this.getInvokers());
@@ -311,8 +313,15 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
         }
     }
 
+    /**
+     * 将每个group中的多个Invoker合并成一个Invoker
+     * @param invokers
+     * @return
+     */
     private List<Invoker<T>> toMergeInvokerList(List<Invoker<T>> invokers) {
         List<Invoker<T>> mergedInvokers = new ArrayList<>();
+
+        // 将Invoker按照group进行分组
         Map<String, List<Invoker<T>>> groupMap = new HashMap<>();
         for (Invoker<T> invoker : invokers) {
             String group = invoker.getUrl().getGroup("");
