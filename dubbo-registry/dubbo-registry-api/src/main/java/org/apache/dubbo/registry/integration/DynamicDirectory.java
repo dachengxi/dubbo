@@ -191,6 +191,12 @@ public abstract class DynamicDirectory<T> extends AbstractDirectory<T> implement
         registry.unsubscribe(url, this);
     }
 
+    /**
+     * 根据Invocation来过滤合适的Invoker
+     * @param invokers
+     * @param invocation
+     * @return
+     */
     @Override
     public List<Invoker<T>> doList(BitList<Invoker<T>> invokers, Invocation invocation) {
         if (forbidden) {
@@ -207,6 +213,7 @@ public abstract class DynamicDirectory<T> extends AbstractDirectory<T> implement
 
         try {
             // Get invokers from cache, only runtime routers will be executed.
+            // 使用路由链来进行筛选
             List<Invoker<T>> result = routerChain.route(getConsumerUrl(), invokers, invocation);
             return result == null ? BitList.emptyList() : result;
         } catch (Throwable t) {

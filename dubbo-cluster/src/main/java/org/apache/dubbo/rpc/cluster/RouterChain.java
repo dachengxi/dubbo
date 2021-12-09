@@ -40,23 +40,31 @@ import static org.apache.dubbo.rpc.cluster.Constants.ROUTER_KEY;
 
 /**
  * Router chain
+ *
+ * 路由链
  */
 public class RouterChain<T> {
     private static final Logger logger = LoggerFactory.getLogger(RouterChain.class);
 
     /**
      * full list of addresses from registry, classified by method name.
+     *
+     * 路由链要过滤的Invoker集合
      */
     private volatile BitList<Invoker<T>> invokers = BitList.emptyList();
 
     /**
      * containing all routers, reconstruct every time 'route://' urls change.
+     *
+     * 路由链要使用的路由集合，包含通过addRouters添加的路由以及builtinRouters中的内置的路由
      */
     private volatile List<Router> routers = Collections.emptyList();
 
     /**
      * Fixed router instances: ConfigConditionRouter, TagRouter, e.g.,
      * the rule for each instance may change but the instance will never delete or recreate.
+     *
+     * 路由链内置的路由集合
      */
     private volatile List<Router> builtinRouters = Collections.emptyList();
 
@@ -68,14 +76,17 @@ public class RouterChain<T> {
     }
 
     private RouterChain(Class<T> interfaceClass, URL url) {
+        // 获取所有的路由工厂实现
         List<RouterFactory> extensionFactories = url.getOrDefaultApplicationModel().getExtensionLoader(RouterFactory.class)
             .getActivateExtension(url, ROUTER_KEY);
 
+        // 使用路由工厂来创建路由对象
         List<Router> routers = extensionFactories.stream()
             .map(factory -> factory.getRouter(url))
             .sorted(Router::compareTo)
             .collect(Collectors.toList());
 
+        // 将解析出来的路由对象设置为内建的路由，并添加到路由缓存中
         initWithRouters(routers);
 
         List<StateRouterFactory> extensionStateRouterFactories = url.getOrDefaultApplicationModel()
@@ -120,6 +131,8 @@ public class RouterChain<T> {
      * from URLs.
      *
      * @param routers routers from 'router://' rules in 2.6.x or before.
+     *
+     * 添加路由
      */
     public void addRouters(List<Router> routers) {
         List<Router> newRouters = new ArrayList<>();
@@ -146,6 +159,7 @@ public class RouterChain<T> {
     }
 
     /**
+     * 根据规则过滤出合适的Invoker
      * @param url
      * @param invocation
      * @return
@@ -172,16 +186,20 @@ public class RouterChain<T> {
 
         List<Invoker<T>> commonRouterResult = new ArrayList<>(resultInvokers);
         // 2. route common router
+        // 遍历所有的路由并进行过滤
         for (Router router : routers) {
             // Copy resultInvokers to a arrayList. BitList not support
+            // 使用具体的路由进行过滤
             RouterResult<Invoker<T>> routeResult = router.route(commonRouterResult, url, invocation, false);
             commonRouterResult = routeResult.getResult();
+            // 过滤完后，没有Invoker可用了，直接返回空
             if (CollectionUtils.isEmpty(commonRouterResult)) {
                 printRouterSnapshot(url, availableInvokers, invocation);
                 return BitList.emptyList();
             }
 
             // stop continue routing
+            // 过滤完一次之后，返回了不需要继续进行路由过滤了，就返回刚才的结果
             if (!routeResult.isNeedContinueRoute()) {
                 return commonRouterResult;
             }
