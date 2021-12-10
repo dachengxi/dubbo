@@ -34,6 +34,8 @@ import static org.apache.dubbo.rpc.cluster.Constants.WEIGHT_KEY;
 
 /**
  * AbstractLoadBalance
+ *
+ * 负载均衡的抽象实现类
  */
 public abstract class AbstractLoadBalance implements LoadBalance {
     /**
@@ -50,17 +52,37 @@ public abstract class AbstractLoadBalance implements LoadBalance {
         return ww < 1 ? 1 : (Math.min(ww, weight));
     }
 
+    /**
+     * 根据负载均衡算法选择一个服务提供者进行调用
+     * @param invokers   invokers.
+     * @param url        refer url
+     * @param invocation invocation.
+     * @param <T>
+     * @return
+     */
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) {
         if (CollectionUtils.isEmpty(invokers)) {
             return null;
         }
+
+        // 只有一个Invoker，没得选
         if (invokers.size() == 1) {
             return invokers.get(0);
         }
+
+        // 使用具体的负载均衡算法进行选择
         return doSelect(invokers, url, invocation);
     }
 
+    /**
+     * 根据负载均衡算法选择一个服务提供者进行调用
+     * @param invokers
+     * @param url
+     * @param invocation
+     * @param <T>
+     * @return
+     */
     protected abstract <T> Invoker<T> doSelect(List<Invoker<T>> invokers, URL url, Invocation invocation);
 
 
@@ -71,23 +93,33 @@ public abstract class AbstractLoadBalance implements LoadBalance {
      * @param invoker    the invoker
      * @param invocation the invocation of this invoker
      * @return weight
+     *
+     * 计算Provider的权重
      */
     protected int getWeight(Invoker<?> invoker, Invocation invocation) {
         int weight;
         URL url = invoker.getUrl();
         // Multiple registry scenario, load balance among multiple registries.
         if (REGISTRY_SERVICE_REFERENCE_PATH.equals(url.getServiceInterface())) {
+            // RegistryService接口的权重从url中直接获取
             weight = url.getParameter(REGISTRY_KEY + "." + WEIGHT_KEY, DEFAULT_WEIGHT);
         } else {
+            // 如果Provider配置了权重
             weight = url.getMethodParameter(invocation.getMethodName(), WEIGHT_KEY, DEFAULT_WEIGHT);
             if (weight > 0) {
+                // Provider启动的时间
                 long timestamp = invoker.getUrl().getParameter(TIMESTAMP_KEY, 0L);
                 if (timestamp > 0L) {
+                    // Provider运行的时长
                     long uptime = System.currentTimeMillis() - timestamp;
                     if (uptime < 0) {
                         return 1;
                     }
+
+                    // Provider设置了预热时长
                     int warmup = invoker.getUrl().getParameter(WARMUP_KEY, DEFAULT_WARMUP);
+
+                    // Provider还在预热，需要重新计算Provider的权重，降低权重
                     if (uptime > 0 && uptime < warmup) {
                         weight = calculateWarmupWeight((int)uptime, warmup, weight);
                     }

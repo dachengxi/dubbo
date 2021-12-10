@@ -36,6 +36,8 @@ import static org.apache.dubbo.rpc.cluster.Constants.WEIGHT_KEY;
  * If the weights are different then it will use random.nextInt(w1 + w2 + ... + wn)
  * Note that if the performance of the machine is better than others, you can set a larger weight.
  * If the performance is not so good, you can set a smaller weight.
+ *
+ * 带权重的随机的负载均衡策略
  */
 public class RandomLoadBalance extends AbstractLoadBalance {
 

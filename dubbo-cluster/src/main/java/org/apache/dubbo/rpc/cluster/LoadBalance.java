@@ -48,7 +48,7 @@ public interface LoadBalance {
      * @param invocation invocation.
      * @return selected invoker.
      *
-     * 选择一个服务提供者进行调用
+     * 根据负载均衡算法选择一个服务提供者进行调用
      */
     @Adaptive("loadbalance")
     <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException;
