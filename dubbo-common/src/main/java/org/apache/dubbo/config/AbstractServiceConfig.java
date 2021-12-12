@@ -32,6 +32,8 @@ import static org.apache.dubbo.common.constants.CommonConstants.SERVICE_FILTER_K
  * AbstractServiceConfig
  *
  * @export
+ *
+ * 服务配置抽象
  */
 public abstract class AbstractServiceConfig extends AbstractInterfaceConfig {
 

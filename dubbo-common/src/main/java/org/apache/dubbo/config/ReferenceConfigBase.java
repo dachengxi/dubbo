@@ -43,6 +43,8 @@ import static org.apache.dubbo.common.constants.CommonConstants.DUBBO;
  * ReferenceConfig
  *
  * @export
+ *
+ * 服务引用基础配置
  */
 public abstract class ReferenceConfigBase<T> extends AbstractReferenceConfig {
 

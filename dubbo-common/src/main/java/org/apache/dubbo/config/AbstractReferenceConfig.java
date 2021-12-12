@@ -31,6 +31,8 @@ import static org.apache.dubbo.common.constants.CommonConstants.STUB_EVENT_KEY;
  *
  * @export
  * @see ReferenceConfigBase
+ *
+ * 服务引用配置
  */
 public abstract class AbstractReferenceConfig extends AbstractInterfaceConfig {
 

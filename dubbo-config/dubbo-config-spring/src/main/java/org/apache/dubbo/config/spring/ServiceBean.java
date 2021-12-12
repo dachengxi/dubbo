@@ -37,6 +37,8 @@ import org.springframework.context.ApplicationEventPublisherAware;
  * ServiceFactoryBean
  *
  * @export
+ *
+ * 和Spring整合使用到的暴露服务的Bean
  */
 public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean, DisposableBean,
         ApplicationContextAware, BeanNameAware, ApplicationEventPublisherAware {
@@ -91,8 +93,13 @@ public class ServiceBean<T> extends ServiceConfig<T> implements InitializingBean
         return service;
     }
 
+    /**
+     * 实现了InitializingBean接口，在Bean初始化的属性设置之后会调用该方法
+     * @throws Exception
+     */
     @Override
     public void afterPropertiesSet() throws Exception {
+        // path是暴露的接口的名字
         if (StringUtils.isEmpty(getPath())) {
             if (StringUtils.isNotEmpty(getInterface())) {
                 setPath(getInterface());

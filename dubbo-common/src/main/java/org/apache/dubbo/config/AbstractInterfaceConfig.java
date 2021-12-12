@@ -61,6 +61,8 @@ import static org.apache.dubbo.common.constants.MetricsConstants.PROTOCOL_PROMET
  * AbstractDefaultConfig
  *
  * @export
+ *
+ * 接口配置抽象
  */
 public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
 

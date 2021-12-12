@@ -43,6 +43,8 @@ import static org.apache.dubbo.common.constants.CommonConstants.DUBBO;
  * ServiceConfig
  *
  * @export
+ *
+ * 服务基础配置抽象
  */
 public abstract class ServiceConfigBase<T> extends AbstractServiceConfig {
 
@@ -468,6 +470,8 @@ public abstract class ServiceConfigBase<T> extends AbstractServiceConfig {
 
     /**
      * export service and auto start application instance
+     *
+     * 开始暴露服务
      */
     public abstract void export();
 

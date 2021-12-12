@@ -95,6 +95,10 @@ import static org.apache.dubbo.rpc.Constants.SCOPE_REMOTE;
 import static org.apache.dubbo.rpc.Constants.TOKEN_KEY;
 import static org.apache.dubbo.rpc.cluster.Constants.EXPORT_KEY;
 
+/**
+ * 服务配置，对暴露的服务的定义
+ * @param <T>
+ */
 public class ServiceConfig<T> extends ServiceConfigBase<T> {
 
     private static final long serialVersionUID = 7868244018230856253L;
@@ -106,11 +110,16 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
      */
     private static final Map<String, Integer> RANDOM_PORT_MAP = new HashMap<String, Integer>();
 
+    /**
+     * 远程调用层
+     */
     private Protocol protocolSPI;
 
     /**
      * A {@link ProxyFactory} implementation that will generate a exported service proxy,the JavassistProxyFactory is its
      * default implementation
+     *
+     * 代理工厂
      */
     private ProxyFactory proxyFactory;
 
@@ -118,6 +127,8 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
 
     /**
      * Whether the provider has been exported
+     *
+     * 服务是否已经暴露出去
      */
     private transient volatile boolean exported;
 
@@ -130,9 +141,14 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
 
     /**
      * The exported services
+     *
+     * 暴露出去的服务的集合
      */
     private final List<Exporter<?>> exporters = new ArrayList<Exporter<?>>();
 
+    /**
+     * 服务监听器集合
+     */
     private final List<ServiceListener> serviceListeners = new ArrayList<>();
     private WritableMetadataService localMetadataService;
 
@@ -211,6 +227,9 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         serviceMetadata.generateServiceKey();
     }
 
+    /**
+     * 暴露服务
+     */
     @Override
     public void export() {
         if (this.exported) {

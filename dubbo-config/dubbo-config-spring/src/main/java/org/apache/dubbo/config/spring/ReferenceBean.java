@@ -94,6 +94,8 @@ import java.util.Map;
  *
  * @see org.apache.dubbo.config.annotation.DubboReference
  * @see org.apache.dubbo.config.spring.reference.ReferenceBeanBuilder
+ *
+ * 和Spring整合用到的引用服务的Bean
  */
 public class ReferenceBean<T> implements FactoryBean<T>,
         ApplicationContextAware, BeanClassLoaderAware, BeanNameAware, InitializingBean, DisposableBean {
