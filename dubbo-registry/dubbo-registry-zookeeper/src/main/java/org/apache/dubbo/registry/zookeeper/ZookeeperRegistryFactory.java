@@ -25,6 +25,8 @@ import org.apache.dubbo.rpc.model.ApplicationModel;
 
 /**
  * ZookeeperRegistryFactory.
+ *
+ * Zookeeper注册中心工厂
  */
 public class ZookeeperRegistryFactory extends AbstractRegistryFactory {
 

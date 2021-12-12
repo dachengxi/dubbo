@@ -39,6 +39,12 @@ import static org.apache.dubbo.common.constants.CommonConstants.TIMEOUT_KEY;
  */
 public abstract class AbstractZookeeperTransporter implements ZookeeperTransporter {
     private static final Logger logger = LoggerFactory.getLogger(ZookeeperTransporter.class);
+
+    /**
+     * 缓存Zookeeper客户端
+     * key：地址
+     * value：客户端实例
+     */
     private final Map<String, ZookeeperClient> zookeeperClientMap = new ConcurrentHashMap<>();
 
     /**
@@ -54,7 +60,9 @@ public abstract class AbstractZookeeperTransporter implements ZookeeperTransport
         ZookeeperClient zookeeperClient;
         // address format: {[username:password@]address}
         List<String> addressList = getURLBackupAddress(url);
+
         // The field define the zookeeper server , including protocol, host, port, username, password
+        // 从缓存中获取Zookeeper客户端实例
         if ((zookeeperClient = fetchAndUpdateZookeeperClientCache(addressList)) != null && zookeeperClient.isConnected()) {
             logger.info("find valid zookeeper client from the cache for address: " + url);
             return zookeeperClient;
@@ -66,8 +74,10 @@ public abstract class AbstractZookeeperTransporter implements ZookeeperTransport
                 return zookeeperClient;
             }
 
+            // 创建Zookeeper客户端实例
             zookeeperClient = createZookeeperClient(url);
             logger.info("No valid zookeeper client found from cache, therefore create a new client for url. " + url);
+            // 将Zookeeper客户端实例放到缓存中
             writeToClientMap(addressList, zookeeperClient);
         }
         return zookeeperClient;
@@ -78,6 +88,8 @@ public abstract class AbstractZookeeperTransporter implements ZookeeperTransport
      *            The url in AbstractZookeeperTransporter#connect parameter is rewritten by this one.
      *            such as: zookeeper://127.0.0.1:2181/org.apache.dubbo.remoting.zookeeper.ZookeeperTransporter
      * @return
+     *
+     * 创建Zookeeper客户端实例
      */
     protected abstract ZookeeperClient createZookeeperClient(URL url);
 
@@ -88,6 +100,8 @@ public abstract class AbstractZookeeperTransporter implements ZookeeperTransport
      *
      * @param addressList
      * @return
+     *
+     * 从缓存中获取Zookeeper客户端实例
      */
     public ZookeeperClient fetchAndUpdateZookeeperClientCache(List<String> addressList) {
 

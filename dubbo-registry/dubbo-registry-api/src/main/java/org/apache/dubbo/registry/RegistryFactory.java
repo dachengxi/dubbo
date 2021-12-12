@@ -26,6 +26,8 @@ import static org.apache.dubbo.common.extension.ExtensionScope.APPLICATION;
  * RegistryFactory. (SPI, Singleton, ThreadSafe)
  *
  * @see org.apache.dubbo.registry.support.AbstractRegistryFactory
+ *
+ * 注册中心工厂抽象
  */
 @SPI(scope = APPLICATION)
 public interface RegistryFactory {
@@ -43,6 +45,8 @@ public interface RegistryFactory {
      *
      * @param url Registry address, is not allowed to be empty
      * @return Registry reference, never return empty value
+     *
+     * 获取注册中心
      */
     @Adaptive({"protocol"})
     Registry getRegistry(URL url);

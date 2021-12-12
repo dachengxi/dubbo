@@ -25,6 +25,8 @@ import java.util.List;
  * NotifyListener. (API, Prototype, ThreadSafe)
  *
  * @see org.apache.dubbo.registry.RegistryService#subscribe(URL, NotifyListener)
+ *
+ * 通知监听器
  */
 public interface NotifyListener {
 
@@ -44,6 +46,10 @@ public interface NotifyListener {
      */
     void notify(List<URL> urls);
 
+    /**
+     * 添加服务监听器
+     * @param instanceListener
+     */
     default void addServiceListener(ServiceInstancesChangedListener instanceListener) {
     }
 

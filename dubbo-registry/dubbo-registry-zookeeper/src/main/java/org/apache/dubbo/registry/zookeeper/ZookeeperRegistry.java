@@ -54,6 +54,8 @@ import static org.apache.dubbo.common.constants.RegistryConstants.ROUTERS_CATEGO
 
 /**
  * ZookeeperRegistry
+ *
+ * 基于Zookeeper的注册中心服务
  */
 public class ZookeeperRegistry extends CacheableFailbackRegistry {
 
@@ -67,6 +69,9 @@ public class ZookeeperRegistry extends CacheableFailbackRegistry {
 
     private final ConcurrentMap<URL, ConcurrentMap<NotifyListener, ChildListener>> zkListeners = new ConcurrentHashMap<>();
 
+    /**
+     * Zookeeper客户端
+     */
     private ZookeeperClient zkClient;
 
     public ZookeeperRegistry(URL url, ZookeeperTransporter zookeeperTransporter) {
@@ -79,7 +84,11 @@ public class ZookeeperRegistry extends CacheableFailbackRegistry {
             group = PATH_SEPARATOR + group;
         }
         this.root = group;
+
+        // Zookeeper客户端连接到ZK服务器
         zkClient = zookeeperTransporter.connect(url);
+
+        // 添加Zookeeper状态监听器
         zkClient.addStateListener((state) -> {
             if (state == StateListener.RECONNECTED) {
                 logger.warn("Trying to fetch the latest urls, in case there're provider changes during connection loss.\n" +

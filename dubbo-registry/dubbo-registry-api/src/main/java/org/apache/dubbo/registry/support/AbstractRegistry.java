@@ -68,6 +68,8 @@ import static org.apache.dubbo.registry.Constants.USER_HOME;
 
 /**
  * AbstractRegistry. (SPI, Prototype, ThreadSafe)
+ *
+ * 注册中心的抽象实现类
  */
 public abstract class AbstractRegistry implements Registry {
 

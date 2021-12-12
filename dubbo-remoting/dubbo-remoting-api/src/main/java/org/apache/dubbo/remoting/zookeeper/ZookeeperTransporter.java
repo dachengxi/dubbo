@@ -22,6 +22,9 @@ import org.apache.dubbo.common.extension.ExtensionScope;
 import org.apache.dubbo.common.extension.SPI;
 import org.apache.dubbo.rpc.model.ApplicationModel;
 
+/**
+ * Zookeeper传输层抽象定义
+ */
 @SPI(scope = ExtensionScope.APPLICATION)
 public interface ZookeeperTransporter {
 
