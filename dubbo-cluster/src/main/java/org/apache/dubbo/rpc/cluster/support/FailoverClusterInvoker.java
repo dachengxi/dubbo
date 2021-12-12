@@ -43,6 +43,8 @@ import static org.apache.dubbo.common.constants.CommonConstants.RETRIES_KEY;
  * <p>
  * <a href="http://en.wikipedia.org/wiki/Failover">Failover</a>
  *
+ * 失败后切换其他的Invoker进行重试
+ *
  */
 public class FailoverClusterInvoker<T> extends AbstractClusterInvoker<T> {
 
@@ -58,20 +60,28 @@ public class FailoverClusterInvoker<T> extends AbstractClusterInvoker<T> {
         List<Invoker<T>> copyInvokers = invokers;
         checkInvokers(copyInvokers, invocation);
         String methodName = RpcUtils.getMethodName(invocation);
+
+        // 计算重试次数，默认重试两次，总共调用3次
         int len = calculateInvokeTimes(methodName);
         // retry loop.
         RpcException le = null; // last exception.
+
+        // 记录已经调用过的Invoker
         List<Invoker<T>> invoked = new ArrayList<Invoker<T>>(copyInvokers.size()); // invoked invokers.
         Set<String> providers = new HashSet<String>(len);
         for (int i = 0; i < len; i++) {
             //Reselect before retry to avoid a change of candidate `invokers`.
             //NOTE: if `invokers` changed, then `invoked` also lose accuracy.
+            // 说明是重试
             if (i > 0) {
                 checkWhetherDestroyed();
+                // 重新调用目录来获取Invoker列表
                 copyInvokers = list(invocation);
                 // check again
                 checkInvokers(copyInvokers, invocation);
             }
+
+            // 使用负载均衡策略选择一个Invoker
             Invoker<T> invoker = select(loadbalance, invocation, copyInvokers, invoked);
             invoked.add(invoker);
             RpcContext.getServiceContext().setInvokers((List) invoked);

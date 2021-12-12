@@ -50,15 +50,24 @@ public class ConsistentHashLoadBalance extends AbstractLoadBalance {
     @SuppressWarnings("unchecked")
     @Override
     protected <T> Invoker<T> doSelect(List<Invoker<T>> invokers, URL url, Invocation invocation) {
+        // 调用的方法名
         String methodName = RpcUtils.getMethodName(invocation);
+
+        // 服务接口.方法名作为可以、
         String key = invokers.get(0).getUrl().getServiceKey() + "." + methodName;
+
         // using the hashcode of list to compute the hash only pay attention to the elements in the list
+        // invoker列表发生变化的时候会重新生成ConsistentHashSelector
         int invokersHashCode = getCorrespondingHashCode(invokers);
+
+        // 根据key从缓存中获取ConsistentHashSelector
         ConsistentHashSelector<T> selector = (ConsistentHashSelector<T>) selectors.get(key);
         if (selector == null || selector.identityHashCode != invokersHashCode) {
             selectors.put(key, new ConsistentHashSelector<T>(invokers, methodName, invokersHashCode));
             selector = (ConsistentHashSelector<T>) selectors.get(key);
         }
+
+        // 一致性哈希算法来进行Invoker的选择
         return selector.select(invocation);
     }
 
@@ -74,10 +83,24 @@ public class ConsistentHashLoadBalance extends AbstractLoadBalance {
 
     private static final class ConsistentHashSelector<T> {
 
+        /**
+         * 记录虚拟Invoker对象的哈希环
+         */
         private final TreeMap<Long, Invoker<T>> virtualInvokers;
+
+        /**
+         * 虚拟Invoker个数
+         */
         private final int replicaNumber;
+
+        /**
+         * Invoker集合的哈希值，可用来判断Invoker列表是否发生了变化
+         */
         private final int identityHashCode;
 
+        /**
+         * 需要参与哈希计算的参数索引
+         */
         private final int[] argumentIndex;
 
         /**
@@ -104,17 +127,28 @@ public class ConsistentHashLoadBalance extends AbstractLoadBalance {
         private static final double OVERLOAD_RATIO_THREAD = 1.5F;
 
         ConsistentHashSelector(List<Invoker<T>> invokers, String methodName, int identityHashCode) {
+
+            // 构建哈希槽
             this.virtualInvokers = new TreeMap<Long, Invoker<T>>();
+
+            // 记录Invoker集合的哈希值
             this.identityHashCode = identityHashCode;
             URL url = invokers.get(0).getUrl();
+
+            // 从hash.nodes中获取虚拟节点的个数，默认是160个
             this.replicaNumber = url.getMethodParameter(methodName, HASH_NODES, 160);
+
+            // 获取参与哈希计算的参数下标，默认是第一个参数
             String[] index = COMMA_SPLIT_PATTERN.split(url.getMethodParameter(methodName, HASH_ARGUMENTS, "0"));
             argumentIndex = new int[index.length];
             for (int i = 0; i < index.length; i++) {
                 argumentIndex[i] = Integer.parseInt(index[i]);
             }
+
+            // 构建虚拟的哈希槽
             for (Invoker<T> invoker : invokers) {
                 String address = invoker.getUrl().getAddress();
+                // replicaNumber默认160
                 for (int i = 0; i < replicaNumber / 4; i++) {
                     byte[] digest = Bytes.getMD5(address + i);
                     for (int h = 0; h < 4; h++) {
@@ -129,9 +163,17 @@ public class ConsistentHashLoadBalance extends AbstractLoadBalance {
             serverRequestCountMap.clear();
         }
 
+        /**
+         * 选择要调用的Invoker对象
+         * @param invocation
+         * @return
+         */
         public Invoker<T> select(Invocation invocation) {
+            // 参与哈希计算的参数拼接到一起
             String key = toKey(invocation.getArguments());
             byte[] digest = Bytes.getMD5(key);
+
+            // 将key进行哈希后选择Invoker对象
             return selectForKey(hash(digest, 0));
         }
         private String toKey(Object[] args) {
@@ -144,8 +186,11 @@ public class ConsistentHashLoadBalance extends AbstractLoadBalance {
             return buf.toString();
         }
         private Invoker<T> selectForKey(long hash) {
+
+            // 从虚拟Invoker对象哈希环中找到第一个节点值大于等于指定哈希值的Invoker对象
             Map.Entry<Long, Invoker<T>> entry = virtualInvokers.ceilingEntry(hash);
             if (entry == null) {
+                // 如果哈希值大于环中所有Invoker，则返回哈希环的第一个Invoker对象
                 entry = virtualInvokers.firstEntry();
             }
 

@@ -47,6 +47,8 @@ import static org.apache.dubbo.rpc.cluster.Constants.FAIL_BACK_TASKS_KEY;
  * Especially useful for services of notification.
  *
  * <a href="http://en.wikipedia.org/wiki/Failback">Failback</a>
+ *
+ * 失败后会记录失败请求，定时进行重发
  */
 public class FailbackClusterInvoker<T> extends AbstractClusterInvoker<T> {
 
@@ -100,14 +102,17 @@ public class FailbackClusterInvoker<T> extends AbstractClusterInvoker<T> {
         URL consumerUrl = RpcContext.getServiceContext().getConsumerUrl();
         try {
             checkInvokers(invokers, invocation);
+            // 使用负载均衡策略选择一个Invoker
             invoker = select(loadbalance, invocation, invokers, null);
             // Asynchronous call method must be used here, because failback will retry in the background.
             // Then the serviceContext will be cleared after the call is completed.
+            // 执行调用
             return invokeWithContextAsync(invoker, invocation, consumerUrl);
         } catch (Throwable e) {
             logger.error("Failback to invoke method " + invocation.getMethodName() + ", wait for retry in background. Ignored exception: "
                 + e.getMessage() + ", ", e);
             if (retries > 0) {
+                // 请求失败后，会添加一个定时任务进行重试
                 addFailed(loadbalance, invocation, invokers, invoker, consumerUrl);
             }
             return AsyncRpcResult.newDefaultAsyncResult(null, null, invocation); // ignore

@@ -44,6 +44,8 @@ import static org.apache.dubbo.common.constants.RegistryConstants.ZONE_KEY;
  * 2. check the zone the current request belongs, pick the registry that has the same zone first.
  * 3. Evenly balance traffic between all registries based on each registry's weight.
  * 4. Pick anyone that's available.
+ *
+ * 在多个注册中心进行选择后，再进行服务节点选择
  */
 public class ZoneAwareClusterInvoker<T> extends AbstractClusterInvoker<T> {
 
@@ -57,6 +59,7 @@ public class ZoneAwareClusterInvoker<T> extends AbstractClusterInvoker<T> {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Result doInvoke(Invocation invocation, final List<Invoker<T>> invokers, LoadBalance loadbalance) throws RpcException {
         // First, pick the invoker (XXXClusterInvoker) that comes from the local registry, distinguish by a 'preferred' key.
+        // 先根据preferred属性找注册中心
         for (Invoker<T> invoker : invokers) {
             ClusterInvoker<T> clusterInvoker = (ClusterInvoker<T>) invoker;
             if (clusterInvoker.isAvailable() && clusterInvoker.getRegistryUrl()
@@ -66,6 +69,7 @@ public class ZoneAwareClusterInvoker<T> extends AbstractClusterInvoker<T> {
         }
 
         // providers in the registry with the same zone
+        // 根据zone选择注册中心
         String zone = invocation.getAttachment(REGISTRY_ZONE);
         if (StringUtils.isNotEmpty(zone)) {
             for (Invoker<T> invoker : invokers) {
@@ -84,12 +88,14 @@ public class ZoneAwareClusterInvoker<T> extends AbstractClusterInvoker<T> {
 
 
         // load balance among all registries, with registry weight count in.
+        // 使用负载均衡策略选择一个Invoker
         Invoker<T> balancedInvoker = select(loadbalance, invocation, invokers, null);
         if (balancedInvoker.isAvailable()) {
             return balancedInvoker.invoke(invocation);
         }
 
         // If none of the invokers has a preferred signal or is picked by the loadbalancer, pick the first one available.
+        // 选择第一个可用的节点
         for (Invoker<T> invoker : invokers) {
             ClusterInvoker<T> clusterInvoker = (ClusterInvoker<T>) invoker;
             if (clusterInvoker.isAvailable()) {
@@ -98,6 +104,7 @@ public class ZoneAwareClusterInvoker<T> extends AbstractClusterInvoker<T> {
         }
 
         //if none available,just pick one
+        // 选择第一个节点
         return invokers.get(0).invoke(invocation);
     }
 

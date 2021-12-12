@@ -54,11 +54,16 @@ import static org.apache.dubbo.rpc.cluster.Constants.DEFAULT_CLUSTER_STICKY;
 
 /**
  * AbstractClusterInvoker
+ *
+ * ClusterInvoker的抽象实现类
  */
 public abstract class AbstractClusterInvoker<T> implements ClusterInvoker<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractClusterInvoker.class);
 
+    /**
+     * 持有的目录
+     */
     protected Directory<T> directory;
 
     protected boolean availableCheck;
@@ -147,6 +152,8 @@ public abstract class AbstractClusterInvoker<T> implements ClusterInvoker<T> {
      * @param selected    exclude selected invokers or not
      * @return the invoker which will final to do invoke.
      * @throws RpcException exception
+     *
+     * 使用负载均衡策略选择一个Invoker
      */
     protected Invoker<T> select(LoadBalance loadbalance, Invocation invocation,
                                 List<Invoker<T>> invokers, List<Invoker<T>> selected) throws RpcException {
@@ -154,8 +161,11 @@ public abstract class AbstractClusterInvoker<T> implements ClusterInvoker<T> {
         if (CollectionUtils.isEmpty(invokers)) {
             return null;
         }
+
+        // 调用的方法名
         String methodName = invocation == null ? StringUtils.EMPTY_STRING : invocation.getMethodName();
 
+        // 获取粘滞连接参数，粘滞连接是指消费者会尽可能的调用同一个服务提供者节点
         boolean sticky = invokers.get(0).getUrl()
             .getMethodParameter(methodName, CLUSTER_STICKY_KEY, DEFAULT_CLUSTER_STICKY);
 
@@ -170,6 +180,7 @@ public abstract class AbstractClusterInvoker<T> implements ClusterInvoker<T> {
             }
         }
 
+        // 选择Invoker
         Invoker<T> invoker = doSelect(loadbalance, invocation, invokers, selected);
 
         if (sticky) {
@@ -185,22 +196,27 @@ public abstract class AbstractClusterInvoker<T> implements ClusterInvoker<T> {
         if (CollectionUtils.isEmpty(invokers)) {
             return null;
         }
+        // 只有一个Invoker可用
         if (invokers.size() == 1) {
             Invoker<T> tInvoker = invokers.get(0);
             checkShouldInvalidateInvoker(tInvoker);
             return tInvoker;
         }
+
+        // 使用负载均衡策略选择Invoker
         Invoker<T> invoker = loadbalance.select(invokers, getUrl(), invocation);
 
         //If the `invoker` is in the  `selected` or invoker is unavailable && availablecheck is true, reselect.
         boolean isSelected = selected != null && selected.contains(invoker);
         boolean isUnavailable = availableCheck && !invoker.isAvailable() && getUrl() != null;
 
+        // Invoker不可用
         if (isUnavailable) {
             invalidateInvoker(invoker);
         }
         if (isSelected || isUnavailable) {
             try {
+                // 重新选择个一个Invoker
                 Invoker<T> rInvoker = reselect(loadbalance, invocation, invokers, selected, availableCheck);
                 if (rInvoker != null) {
                     invoker = rInvoker;
@@ -278,6 +294,7 @@ public abstract class AbstractClusterInvoker<T> implements ClusterInvoker<T> {
 
         // 2. Use loadBalance to select one (all the reselectInvokers are available)
         if (!reselectInvokers.isEmpty()) {
+            // 使用负载均衡策略重新选择一个invoker
             return loadbalance.select(reselectInvokers, getUrl(), invocation);
         }
 
@@ -316,8 +333,15 @@ public abstract class AbstractClusterInvoker<T> implements ClusterInvoker<T> {
         }
     }
 
+    /**
+     * 进行服务调用
+     * @param invocation
+     * @return
+     * @throws RpcException
+     */
     @Override
     public Result invoke(final Invocation invocation) throws RpcException {
+        // 检查下当前Invoker是否已销毁
         checkWhetherDestroyed();
 
         // binding attachments into invocation.
@@ -326,9 +350,14 @@ public abstract class AbstractClusterInvoker<T> implements ClusterInvoker<T> {
 //            ((RpcInvocation) invocation).addObjectAttachmentsIfAbsent(contextAttachments);
 //        }
 
+        // 通过持有的目录来获取所有的Invoker列表，并且已经经过路由过滤了
         List<Invoker<T>> invokers = list(invocation);
+
+        // 获取负载均衡的实现
         LoadBalance loadbalance = initLoadBalance(invokers, invocation);
         RpcUtils.attachInvocationIdIfAsync(getUrl(), invocation);
+
+        // 使用具体的子类执行调用
         return doInvoke(invocation, invokers, loadbalance);
     }
 

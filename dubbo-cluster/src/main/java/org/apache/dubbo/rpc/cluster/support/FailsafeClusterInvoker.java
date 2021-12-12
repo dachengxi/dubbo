@@ -34,6 +34,7 @@ import java.util.List;
  *
  * <a href="http://en.wikipedia.org/wiki/Fail-safe">Fail-safe</a>
  *
+ * 失败后返回空结果失败后返回空结果
  */
 public class FailsafeClusterInvoker<T> extends AbstractClusterInvoker<T> {
     private static final Logger logger = LoggerFactory.getLogger(FailsafeClusterInvoker.class);
@@ -46,9 +47,13 @@ public class FailsafeClusterInvoker<T> extends AbstractClusterInvoker<T> {
     public Result doInvoke(Invocation invocation, List<Invoker<T>> invokers, LoadBalance loadbalance) throws RpcException {
         try {
             checkInvokers(invokers, invocation);
+            // 使用负载均衡策略选择一个Invoker
             Invoker<T> invoker = select(loadbalance, invocation, invokers, null);
+
+            // 执行调用
             return invokeWithContext(invoker, invocation);
         } catch (Throwable e) {
+            // 失败后返回空结果
             logger.error("Failsafe ignore exception: " + e.getMessage(), e);
             return AsyncRpcResult.newDefaultAsyncResult(null, null, invocation); // ignore
         }

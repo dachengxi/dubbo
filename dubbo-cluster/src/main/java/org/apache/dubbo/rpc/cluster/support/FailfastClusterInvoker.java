@@ -32,6 +32,8 @@ import java.util.List;
  * Usually used for non-idempotent write operations
  *
  * <a href="http://en.wikipedia.org/wiki/Fail-fast">Fail-fast</a>
+ *
+ * 失败后抛异常
  */
 public class FailfastClusterInvoker<T> extends AbstractClusterInvoker<T> {
 
@@ -42,10 +44,14 @@ public class FailfastClusterInvoker<T> extends AbstractClusterInvoker<T> {
     @Override
     public Result doInvoke(Invocation invocation, List<Invoker<T>> invokers, LoadBalance loadbalance) throws RpcException {
         checkInvokers(invokers, invocation);
+
+        // 使用负载均衡策略选择一个Invoker
         Invoker<T> invoker = select(loadbalance, invocation, invokers, null);
         try {
+            // 执行调用
             return invokeWithContext(invoker, invocation);
         } catch (Throwable e) {
+            // 调用失败后抛异常
             if (e instanceof RpcException && ((RpcException) e).isBiz()) { // biz exception.
                 throw (RpcException) e;
             }

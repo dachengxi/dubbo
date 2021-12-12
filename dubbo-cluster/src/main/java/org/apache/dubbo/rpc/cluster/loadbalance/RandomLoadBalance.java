@@ -54,39 +54,55 @@ public class RandomLoadBalance extends AbstractLoadBalance {
     @Override
     protected <T> Invoker<T> doSelect(List<Invoker<T>> invokers, URL url, Invocation invocation) {
         // Number of invokers
+        // Invoker的数量
         int length = invokers.size();
 
+        // 如果不需要进行加权重的随机计算，则直接从Invoker列表中随机选择一个
         if (!needWeightLoadBalance(invokers,invocation)){
             return invokers.get(ThreadLocalRandom.current().nextInt(length));
         }
 
         // Every invoker has the same weight?
+        // 是否所有的Invoker的权重都一样
         boolean sameWeight = true;
+
         // the maxWeight of every invokers, the minWeight = 0 or the maxWeight of the last invoker
+        // weights用来存储每个Invoker对应的权重
         int[] weights = new int[length];
+
         // The sum of weights
+        // 记录总权重
         int totalWeight = 0;
         for (int i = 0; i < length; i++) {
+            // 获取每个Invoker的权重
             int weight = getWeight(invokers.get(i), invocation);
+
             // Sum
+            // 每个Invoker权重加一起合成总权重
             totalWeight += weight;
             // save for later use
             weights[i] = totalWeight;
+            // 检测是不是每个Invoker的权重都相同
             if (sameWeight && totalWeight != weight * (i + 1)) {
                 sameWeight = false;
             }
         }
+
+        // 如果不是所有的Invoker权重都相同，则计算Invoker的权重区间
         if (totalWeight > 0 && !sameWeight) {
             // If (not every invoker has the same weight & at least one invoker's weight>0), select randomly based on totalWeight.
+            // 获取一个0到总权重之间的随机数
             int offset = ThreadLocalRandom.current().nextInt(totalWeight);
             // Return a invoker based on the random value.
             for (int i = 0; i < length; i++) {
+                // 随机数落在了Invoker的权重范围内，则返回该Invoker
                 if (offset < weights[i]) {
                     return invokers.get(i);
                 }
             }
         }
         // If all invokers have the same weight value or totalWeight=0, return evenly.
+        // 如果每个Invoker的权重都相同，则随机选择一个Invoker
         return invokers.get(ThreadLocalRandom.current().nextInt(length));
     }
 

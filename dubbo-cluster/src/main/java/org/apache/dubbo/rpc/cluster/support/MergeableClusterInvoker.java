@@ -46,6 +46,8 @@ import static org.apache.dubbo.rpc.Constants.MERGER_KEY;
 
 /**
  * @param <T>
+ *
+ * 对多个节点进行调用后合并结果
  */
 @SuppressWarnings("unchecked")
 public class MergeableClusterInvoker<T> extends AbstractClusterInvoker<T> {
@@ -86,9 +88,11 @@ public class MergeableClusterInvoker<T> extends AbstractClusterInvoker<T> {
         }
 
         Map<String, Result> results = new HashMap<>();
+        // 遍历所有的Invoker进行调用
         for (final Invoker<T> invoker : invokers) {
             RpcInvocation subInvocation = new RpcInvocation(invocation, invoker);
             subInvocation.setAttachment(ASYNC_KEY, "true");
+            // 记录调用结果
             results.put(invoker.getUrl().getServiceKey(), invokeWithContext(invoker, subInvocation));
         }
 
@@ -96,6 +100,7 @@ public class MergeableClusterInvoker<T> extends AbstractClusterInvoker<T> {
 
         List<Result> resultList = new ArrayList<>(results.size());
 
+        // 遍历记录的调用结果，挨个等待返回
         for (Map.Entry<String, Result> entry : results.entrySet()) {
             Result asyncResult = entry.getValue();
             try {
@@ -162,6 +167,7 @@ public class MergeableClusterInvoker<T> extends AbstractClusterInvoker<T> {
                 for (Result r : resultList) {
                     rets.add(r.getValue());
                 }
+                // 执行合并操作
                 result = resultMerger.merge(rets.toArray((Object[]) Array.newInstance(returnType, 0)));
             } else {
                 throw new RpcException("There is no merger to merge result.");

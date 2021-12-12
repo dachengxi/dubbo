@@ -24,6 +24,7 @@ import org.apache.dubbo.rpc.cluster.Directory;
 /**
  * AvailableCluster
  *
+ * 遍历所有Invoker进行调用，遇到第一个可用的节点调用成功后，就返回结果，调用失败直接抛异常
  */
 public class AvailableCluster implements Cluster {
 

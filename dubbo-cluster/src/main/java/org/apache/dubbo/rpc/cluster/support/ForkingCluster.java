@@ -23,6 +23,7 @@ import org.apache.dubbo.rpc.cluster.support.wrapper.AbstractCluster;
 /**
  * {@link ForkingClusterInvoker}
  *
+ * 并行调用多个服务提供者，有一个成功就返回结果
  */
 public class ForkingCluster extends AbstractCluster {
 

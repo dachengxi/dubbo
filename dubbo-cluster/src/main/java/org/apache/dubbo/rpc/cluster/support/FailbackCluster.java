@@ -23,6 +23,8 @@ import org.apache.dubbo.rpc.cluster.support.wrapper.AbstractCluster;
 /**
  * {@link FailbackClusterInvoker}
  *
+ * 失败后会记录失败请求，定时进行重发
+ *
  */
 public class FailbackCluster extends AbstractCluster {
 

@@ -28,6 +28,7 @@ import java.util.List;
 /**
  * AvailableCluster
  *
+ * 遍历所有Invoker进行调用，遇到第一个可用的节点调用成功后，就返回结果，调用失败直接抛异常
  */
 public class AvailableClusterInvoker<T> extends AbstractClusterInvoker<T> {
 
@@ -37,6 +38,7 @@ public class AvailableClusterInvoker<T> extends AbstractClusterInvoker<T> {
 
     @Override
     public Result doInvoke(Invocation invocation, List<Invoker<T>> invokers, LoadBalance loadbalance) throws RpcException {
+        // 遍历所有的Invoker进行调用
         for (Invoker<T> invoker : invokers) {
             if (invoker.isAvailable()) {
                 return invokeWithContext(invoker, invocation);

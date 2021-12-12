@@ -31,6 +31,8 @@ import java.util.List;
 
 /**
  * BroadcastClusterInvoker
+ *
+ * 广播调用每一个服务提供者，如果任意一个节点报错，会在全部调用结束后抛异常
  */
 public class BroadcastClusterInvoker<T> extends AbstractClusterInvoker<T> {
 
@@ -64,6 +66,7 @@ public class BroadcastClusterInvoker<T> extends AbstractClusterInvoker<T> {
 
         int failThresholdIndex = invokers.size() * broadcastFailPercent / MAX_BROADCAST_FAIL_PERCENT;
         int failIndex = 0;
+        // 遍历所有的Invoker进行调用
         for (Invoker<T> invoker : invokers) {
             try {
                 result = invokeWithContext(invoker, invocation);
@@ -88,6 +91,7 @@ public class BroadcastClusterInvoker<T> extends AbstractClusterInvoker<T> {
             }
         }
 
+        // 任意一个报错，最后会抛异常
         if (exception != null) {
             if (failIndex == failThresholdIndex) {
                 logger.debug(

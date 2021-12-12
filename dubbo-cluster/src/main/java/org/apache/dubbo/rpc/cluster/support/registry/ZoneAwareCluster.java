@@ -21,6 +21,9 @@ import org.apache.dubbo.rpc.cluster.Directory;
 import org.apache.dubbo.rpc.cluster.support.AbstractClusterInvoker;
 import org.apache.dubbo.rpc.cluster.support.wrapper.AbstractCluster;
 
+/**
+ * 在多个注册中心进行选择后，再进行服务节点选择
+ */
 public class ZoneAwareCluster extends AbstractCluster {
 
     public final static String NAME = "zone-aware";

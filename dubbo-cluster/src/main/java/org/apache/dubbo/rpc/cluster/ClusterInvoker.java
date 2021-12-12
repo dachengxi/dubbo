@@ -30,11 +30,21 @@ import org.apache.dubbo.rpc.Invoker;
  * multi-registry use cases: first, pick up one ClusterInvoker, then do LB inside the chose ClusterInvoker.
  *
  * @param <T>
+ *
+ * ClusterInvoker持有一组正常的Invoker
  */
 public interface ClusterInvoker<T> extends Invoker<T> {
 
+    /**
+     * 获取注册中心URL
+     * @return
+     */
     URL getRegistryUrl();
 
+    /**
+     * 获取目录
+     * @return
+     */
     Directory<T> getDirectory();
 
     boolean isDestroyed();
