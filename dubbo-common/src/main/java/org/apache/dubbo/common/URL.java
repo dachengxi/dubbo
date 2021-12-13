@@ -108,15 +108,31 @@ import static org.apache.dubbo.common.utils.StringUtils.isBlank;
  *
  * @see java.net.URL
  * @see java.net.URI
+ *
+ * dubbo协议：dubbo://192.168.1.10:20880/xxxxxx
+ * 服务提供者：provider://192.168.1.10:20880/xxxxxx
+ * 服务消费者：consumer://192.168.1.10:20880/xxxxxx
+ * 服务暴露的临时协议：registry://192.168.1.10:2181/xxxxxx
+ * Zookeeper注册中心协议：zookeeper://192.168.1.10:2181/xxxxxx
  */
 public /*final**/
 class URL implements Serializable {
 
     private static final long serialVersionUID = -1985165475234910535L;
 
+    /**
+     * 缓存URL
+     */
     private static Map<String, URL> cachedURLs = new LRUCache<>();
 
+    /**
+     * URL地址：地址+端口
+     */
     private final URLAddress urlAddress;
+
+    /**
+     * URL中的参数
+     */
     private final URLParam urlParam;
 
     // ==== cache ====
@@ -214,6 +230,11 @@ class URL implements Serializable {
         this.attributes = null;
     }
 
+    /**
+     * 从缓存中获取URL，没有的话就构建一个URL并放入缓存中
+     * @param url
+     * @return
+     */
     public static URL cacheableValueOf(String url) {
         URL cachedURL = cachedURLs.get(url);
         if (cachedURL != null) {
@@ -229,6 +250,8 @@ class URL implements Serializable {
      *
      * @param url, decoded url string
      * @return
+     *
+     * 构建URL对象，url不进行编码
      */
     public static URL valueOf(String url) {
         return valueOf(url, false);
@@ -246,6 +269,8 @@ class URL implements Serializable {
      * @param url,     url string
      * @param encoded, encoded or decoded
      * @return
+     *
+     * 构建URL对象
      */
     public static URL valueOf(String url, boolean encoded) {
         if (encoded) {
@@ -254,27 +279,51 @@ class URL implements Serializable {
         return URLStrParser.parseDecodedStr(url);
     }
 
+    /**
+     * 构建URL对象，并指定要保留的参数
+     * @param url
+     * @param reserveParams 要保留的参数
+     * @return
+     */
     public static URL valueOf(String url, String... reserveParams) {
+        // 构建URL对象
         URL result = valueOf(url);
         if (reserveParams == null || reserveParams.length == 0) {
             return result;
         }
+        // 保存要保留的参数
         Map<String, String> newMap = new HashMap<>(reserveParams.length);
+
+        // url中携带的参数
         Map<String, String> oldMap = result.getParameters();
         for (String reserveParam : reserveParams) {
             String tmp = oldMap.get(reserveParam);
+            // 参数要保留，就加到newMap中
             if (StringUtils.isNotEmpty(tmp)) {
                 newMap.put(reserveParam, tmp);
             }
         }
+
+        // URL清空原来的所有参数后，将保留的参数重新添加进去
         return result.clearParameters().addParameters(newMap);
     }
 
+    /**
+     * 构建URL对象，并指定要保留的参数，以及要保留参数的前缀
+     * @param url
+     * @param reserveParams
+     * @param reserveParamPrefixs
+     * @return
+     */
     public static URL valueOf(URL url, String[] reserveParams, String[] reserveParamPrefixs) {
+        // 保存要保留的参数
         Map<String, String> newMap = new HashMap<>();
+
+        // url中携带的参数
         Map<String, String> oldMap = url.getParameters();
         if (reserveParamPrefixs != null && reserveParamPrefixs.length != 0) {
             for (Map.Entry<String, String> entry : oldMap.entrySet()) {
+                // url中携带的参数如果包含指定的前缀，则保留
                 for (String reserveParamPrefix : reserveParamPrefixs) {
                     if (entry.getKey().startsWith(reserveParamPrefix) && StringUtils.isNotEmpty(entry.getValue())) {
                         newMap.put(entry.getKey(), entry.getValue());
@@ -285,6 +334,7 @@ class URL implements Serializable {
 
         if (reserveParams != null) {
             for (String reserveParam : reserveParams) {
+                // 指定的保留的参数如果存在，则保留
                 String tmp = oldMap.get(reserveParam);
                 if (StringUtils.isNotEmpty(tmp)) {
                     newMap.put(reserveParam, tmp);
@@ -295,6 +345,11 @@ class URL implements Serializable {
             : new ServiceConfigURL(url.getProtocol(), url.getUsername(), url.getPassword(), url.getHost(), url.getPort(), url.getPath(), newMap, url.getAttributes());
     }
 
+    /**
+     * 编码
+     * @param value
+     * @return
+     */
     public static String encode(String value) {
         if (StringUtils.isEmpty(value)) {
             return "";
@@ -306,6 +361,11 @@ class URL implements Serializable {
         }
     }
 
+    /**
+     * 解码
+     * @param value
+     * @return
+     */
     public static String decode(String value) {
         if (StringUtils.isEmpty(value)) {
             return "";
@@ -317,12 +377,21 @@ class URL implements Serializable {
         }
     }
 
+    /**
+     * 给地址添加默认端口号
+     * @param address
+     * @param defaultPort
+     * @return
+     */
     static String appendDefaultPort(String address, int defaultPort) {
         if (address != null && address.length() > 0 && defaultPort > 0) {
             int i = address.indexOf(':');
+            // 没有指定端口号，添加:和默认端口号
             if (i < 0) {
                 return address + ":" + defaultPort;
-            } else if (Integer.parseInt(address.substring(i + 1)) == 0) {
+            }
+            // 地址中指定的端口号为0，则添加默认端口号
+            else if (Integer.parseInt(address.substring(i + 1)) == 0) {
                 return address.substring(0, i + 1) + defaultPort;
             }
         }
@@ -341,6 +410,11 @@ class URL implements Serializable {
         return urlAddress == null ? null : urlAddress.getProtocol();
     }
 
+    /**
+     * 添加协议
+     * @param protocol
+     * @return
+     */
     public URL setProtocol(String protocol) {
         URLAddress newURLAddress = urlAddress.setProtocol(protocol);
         return returnURL(newURLAddress);
@@ -350,6 +424,11 @@ class URL implements Serializable {
         return urlAddress == null ? null : urlAddress.getUsername();
     }
 
+    /**
+     * 设置用户名
+     * @param username
+     * @return
+     */
     public URL setUsername(String username) {
         URLAddress newURLAddress = urlAddress.setUsername(username);
         return returnURL(newURLAddress);
@@ -359,6 +438,11 @@ class URL implements Serializable {
         return urlAddress == null ? null : urlAddress.getPassword();
     }
 
+    /**
+     * 设置密码
+     * @param password
+     * @return
+     */
     public URL setPassword(String password) {
         URLAddress newURLAddress = urlAddress.setPassword(password);
         return returnURL(newURLAddress);
@@ -417,6 +501,11 @@ class URL implements Serializable {
         return urlAddress == null ? null : urlAddress.getHost();
     }
 
+    /**
+     * 设置地址
+     * @param host
+     * @return
+     */
     public URL setHost(String host) {
         URLAddress newURLAddress = urlAddress.setHost(host);
         return returnURL(newURLAddress);
@@ -427,6 +516,11 @@ class URL implements Serializable {
         return urlAddress == null ? 0 : urlAddress.getPort();
     }
 
+    /**
+     * 设置端口号
+     * @param port
+     * @return
+     */
     public URL setPort(int port) {
         URLAddress newURLAddress = urlAddress.setPort(port);
         return returnURL(newURLAddress);
@@ -441,6 +535,11 @@ class URL implements Serializable {
         return urlAddress.getAddress();
     }
 
+    /**
+     * 设置地址
+     * @param address
+     * @return
+     */
     public URL setAddress(String address) {
         int i = address.lastIndexOf(':');
         String host;

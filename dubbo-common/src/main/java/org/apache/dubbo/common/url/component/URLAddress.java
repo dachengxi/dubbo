@@ -26,13 +26,26 @@ import java.util.Objects;
 
 import static org.apache.dubbo.common.constants.CommonConstants.PATH_SEPARATOR;
 
+/**
+ * URL地址对象
+ */
 public class URLAddress implements Serializable {
     private static final long serialVersionUID = -1985165475234910535L;
 
+    /**
+     * 地址
+     */
     protected String host;
+
+    /**
+     * 端口
+     */
     protected int port;
 
     // cache
+    /**
+     * 缓存原始地址
+     */
     protected transient String rawAddress;
     protected transient long timestamp;
 

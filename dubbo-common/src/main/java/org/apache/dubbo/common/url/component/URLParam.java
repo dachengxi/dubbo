@@ -54,6 +54,8 @@ import static org.apache.dubbo.common.constants.CommonConstants.TIMESTAMP_KEY;
  * current running environment. If you want to make URL as a parameter, please call
  * {@link URL#toSerializableURL()} to create {@link URLPlainParam} instead.
  * @since 3.0
+ *
+ * URL参数
  */
 public class URLParam {
 
@@ -68,6 +70,8 @@ public class URLParam {
 
     /**
      * the original parameters string, empty if parameters have been modified or init by {@link Map}
+     *
+     * 原始参数
      */
     private final String rawParam;
 
