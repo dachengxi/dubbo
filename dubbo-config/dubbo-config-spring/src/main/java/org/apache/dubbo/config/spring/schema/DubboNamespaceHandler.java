@@ -43,6 +43,8 @@ import org.w3c.dom.Element;
  * DubboNamespaceHandler
  *
  * @export
+ *
+ * Dubbo的xml的命名空间处理器
  */
 public class DubboNamespaceHandler extends NamespaceHandlerSupport implements ConfigurableSourceBeanMetadataElement {
 

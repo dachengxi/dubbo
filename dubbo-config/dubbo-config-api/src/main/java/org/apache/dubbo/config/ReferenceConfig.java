@@ -105,12 +105,16 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
      * <p>
      * Actually，when the {@link ExtensionLoader} init the {@link Protocol} instants,it will automatically wraps two
      * layers, and eventually will get a <b>ProtocolFilterWrapper</b> or <b>ProtocolListenerWrapper</b>
+     *
+     * 远程调用层
      */
     private Protocol protocolSPI;
 
     /**
      * A {@link ProxyFactory} implementation that will generate a reference service's proxy,the JavassistProxyFactory is
      * its default implementation
+     *
+     * 代理工厂
      */
     private ProxyFactory proxyFactory;
 
@@ -118,11 +122,15 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
 
     /**
      * The interface proxy reference
+     *
+     * 消费的服务接口的代理对象实例
      */
     private transient volatile T ref;
 
     /**
      * The invoker of the reference service
+     *
+     * 消费的服务接口对应的Invoker对象
      */
     private transient volatile Invoker<?> invoker;
 

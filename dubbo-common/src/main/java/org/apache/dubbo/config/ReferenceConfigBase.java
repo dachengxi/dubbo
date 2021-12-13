@@ -52,6 +52,8 @@ public abstract class ReferenceConfigBase<T> extends AbstractReferenceConfig {
 
     /**
      * The interface class of the reference service
+     *
+     * 引用的服务接口的Class对象
      */
     protected Class<?> interfaceClass;
 

@@ -93,6 +93,8 @@ public abstract class AbstractConfig implements Serializable {
 
     /**
      * The config id
+     *
+     * 配置ID，Bean定义的名称
      */
     private String id;
 

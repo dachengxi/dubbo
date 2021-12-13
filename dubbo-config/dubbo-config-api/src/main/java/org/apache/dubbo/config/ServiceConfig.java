@@ -107,6 +107,8 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
 
     /**
      * A random port cache, the different protocols who has no port specified have different random port
+     *
+     * 随机端口集合
      */
     private static final Map<String, Integer> RANDOM_PORT_MAP = new HashMap<String, Integer>();
 
